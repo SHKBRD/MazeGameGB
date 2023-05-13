@@ -1,0 +1,250 @@
+#include <gb/gb.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "tiles/BGGameTiles.c"
+#include "tiles/MainSpriteTiles.c"
+
+#include "maps/ExitTile.c"
+#include "maps/BlankTile.c"
+
+#include "maps/BackgroundArrange.c"
+#include "maps/Map1.c"
+
+BOOLEAN paused = FALSE;
+BOOLEAN pressing_up = FALSE;
+BOOLEAN pressing_down = FALSE;
+BOOLEAN pressing_left = FALSE;
+BOOLEAN pressing_right = FALSE;
+uint8_t frame_counter = 0; 
+
+unsigned char GameMap[320] = {
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x04,0x06,
+  0x04,0x06,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x05,0x07,
+  0x05,0x07,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x04,0x06,
+  0x04,0x06,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x05,0x07,
+  0x05,0x07,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x04,0x06,0x04,0x06,0x04,0x06,0x04,0x06,
+  0x04,0x06,0x04,0x06,0x04,0x06,0x04,0x06,0x00,0x00,
+  0x00,0x00,0x05,0x07,0x05,0x07,0x05,0x07,0x05,0x07,
+  0x05,0x07,0x05,0x07,0x05,0x07,0x05,0x07,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+};
+uint8_t GameMapWidth = 20;
+uint8_t GameMapHeight = 16;
+
+const unsigned char freq_vals[] = 
+{
+    0x21,
+    0x41,
+    0x61,
+    0x81,
+    0xA1,
+    0xC1,
+    0xF1
+};
+
+struct interact
+{
+    uint8_t x;
+    uint8_t y; 
+};
+
+void squareone_play(uint8_t reg0, uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
+    NR10_REG = reg0;
+    NR11_REG = reg1;
+    NR12_REG = reg2;
+    NR13_REG = reg3;
+    NR14_REG = reg4;
+}
+
+void noise_play(uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
+    NR41_REG = reg1;
+    NR42_REG = reg2;
+    NR43_REG = reg3;
+    NR44_REG = reg4;
+}
+
+uint8_t canplayermove(uint8_t playerX, uint8_t playerY){ 
+    // 0 is unmovable
+    // 1 is movable
+    // 2 is exit
+    // 3 is door
+    uint8_t indexTLx, indexTLy, result;
+    uint16_t tileindexTL;
+
+    indexTLx = (playerX - 8) / 8;
+    indexTLy = (playerY - 16) / 8;
+    tileindexTL = 20 * indexTLy + indexTLx;
+    if (GameMap[tileindexTL] >= 0x04 && GameMap[tileindexTL] <= 0x07) {
+        result = 1;
+    } else if ((GameMap[tileindexTL] >= 0x14 && GameMap[tileindexTL] <= 0x17)){
+        result = 2;
+    } else {
+        result = 0;
+    }
+
+    return result;
+}
+
+void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_height){
+    uint16_t i;
+    for (i=0; i<320; ++i) 
+    {
+        GameMap[i] = new_BG[i];
+    }
+    GameMapWidth = new_width;
+    GameMapHeight = new_height;
+    set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
+}
+
+void game(){
+
+    uint8_t game_state = 0;
+    uint8_t current_level = 1;
+
+
+    struct interact robot;
+    robot.x = 24;
+    robot.y = 32;
+
+    update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
+
+    SPRITES_8x16;
+    set_bkg_data(0, 40, GameTiles);
+    set_sprite_data(0, 4 , MainSpriteLabel);
+    set_sprite_tile(0, 1);
+    move_sprite(0, robot.x, 64);
+    set_sprite_tile(1, 2);
+    move_sprite(1, robot.x + 8, 64);
+
+    uint8_t joy_inp = joypad();
+    uint8_t prev_joy_inp = joy_inp;
+
+    while(1) {
+
+    prev_joy_inp = joy_inp;
+    joy_inp = joypad();
+
+    switch (game_state) {
+    case 0:
+        if (joy_inp & J_UP) {   
+            if (!pressing_up) {
+                switch (canplayermove(robot.x, robot.y - 16)){
+                case 0:
+                    break;
+                case 1:
+                    squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+                    robot.y -= 16;
+                    pressing_up = TRUE;
+                    break;
+                case 2:
+                    noise_play(0x2D,0x67,0x01,0x80);
+                    robot.y -= 16;
+                    pressing_up = TRUE;
+                    update_level_map(BaseBG, BaseBGWidth, BaseBGHeight);
+                    break;
+                }
+            }
+        } else {
+            pressing_up = FALSE;
+        } 
+
+        if (joy_inp & J_DOWN) {     
+            if (!pressing_down) {       
+                if (canplayermove(robot.x, robot.y + 16)) {
+                    squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+                    robot.y += 16;
+                    pressing_down = TRUE;
+                }
+            }
+        } else {
+            pressing_down = FALSE;
+        }
+
+        if (joy_inp & J_LEFT) {   
+            if (!pressing_left) {
+                if (canplayermove(robot.x - 16, robot.y)) {
+                squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+                robot.x -= 16;
+                pressing_left = TRUE;
+                }
+            }
+        } else {
+            pressing_left = FALSE;
+        } 
+
+        if (joy_inp & J_RIGHT) {     
+            if (!pressing_right) {       
+                if (canplayermove(robot.x + 16, robot.y)) {
+                    squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+                    robot.x += 16;
+                    pressing_right = TRUE;
+                }
+            }
+        } else {
+            pressing_right = FALSE;
+        }
+
+        if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+            game_state = 1;
+            set_bkg_tiles(0, 0, 2, 2, BaseBG);
+        }
+        break;
+    
+    // Handle paused case
+    case 1:
+        if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+            game_state = 0;
+            set_bkg_tiles(2, 0, 2, 2, BaseBG);
+        }
+        break;
+
+    default:
+        // Handle other game states here
+        break;
+}
+
+    move_sprite(0, robot.x, robot.y);
+    move_sprite(1, robot.x + 8, robot.y);
+
+    frame_counter++;
+    wait_vbl_done();
+    }
+}
+
+void main(){
+
+    SHOW_BKG;
+    SHOW_SPRITES;
+    DISPLAY_ON;
+    NR52_REG = 0x80;
+    NR50_REG = 0x77;
+    NR51_REG = 0xFF;
+
+    game();
+
+}
