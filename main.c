@@ -3,14 +3,21 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "tiles/GBrobo.c"
 #include "tiles/BGGameTiles.c"
 #include "tiles/MainSpriteTiles.c"
+#include "tiles/HudTiles.c"
 
 #include "maps/ExitTile.c"
 #include "maps/BlankTile.c"
 
+#include "maps/GBRoboMap.c"
+#include "maps/HudMap.c"
 #include "maps/BackgroundArrange.c"
 #include "maps/Map1.c"
+#include "maps/Map2.c"
+#include "maps/Map3.c"
+
 
 BOOLEAN paused = FALSE;
 BOOLEAN pressing_up = FALSE;
@@ -72,6 +79,9 @@ struct interact
     uint8_t x;
     uint8_t y; 
 };
+struct interact robot;
+
+uint8_t current_level = 255;
 
 void squareone_play(uint8_t reg0, uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
     NR10_REG = reg0;
@@ -89,20 +99,19 @@ void noise_play(uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
 }
 
 uint8_t canplayermove(uint8_t playerX, uint8_t playerY){ 
-    // 0 is unmovable
-    // 1 is movable
-    // 2 is exit
-    // 3 is door
     uint8_t indexTLx, indexTLy, result;
     uint16_t tileindexTL;
 
     indexTLx = (playerX - 8) / 8;
     indexTLy = (playerY - 16) / 8;
     tileindexTL = 20 * indexTLy + indexTLx;
-    if (GameMap[tileindexTL] >= 0x04 && GameMap[tileindexTL] <= 0x07) {
+    // blank tile and closed switch floor tile
+    if ((GameMap[tileindexTL] >= 0x04 && GameMap[tileindexTL] <= 0x07) || (GameMap[tileindexTL] >= 0x20 && GameMap[tileindexTL] <= 0x23)) {
         result = 1;
+    // exit tile
     } else if ((GameMap[tileindexTL] >= 0x14 && GameMap[tileindexTL] <= 0x17)){
         result = 2;
+    // unmovable tiles, dedfault to all of them
     } else {
         result = 0;
     }
@@ -116,25 +125,88 @@ void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_hei
     {
         GameMap[i] = new_BG[i];
     }
+    i = 0;
     GameMapWidth = new_width;
     GameMapHeight = new_height;
     set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
 }
 
+void goto_level(uint8_t level) {
+    if (level == 1) {
+        update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight - 2);
+        robot.x = 24;
+        robot.y = 32;
+    } else if (level == 2) {
+        update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight - 2);
+        robot.x = 88;
+        robot.y = 32;
+    } else if (level == 3) {
+        update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight - 2);
+        robot.x = 24;
+        robot.y = 32;
+    }
+    current_level = level;
+}
+
+void fade_to_level(uint8_t selected_level, BOOLEAN title) {
+    uint8_t fade_counter = 0;
+    uint8_t fade_phase = 0;
+
+    while(1) {
+        fade_counter++;
+        if (!(fade_counter % 4)) {
+            fade_phase++;
+        }
+        if (fade_phase == 0) {
+            BGP_REG = 0xE4; //11100100
+            OBP0_REG = 0xE4;
+        } else if (fade_phase == 1) {
+            BGP_REG = 0xF9; //11111001
+            OBP0_REG = 0xF9;
+        } else if (fade_phase == 2) {
+            BGP_REG = 0xFE; //11111001
+            OBP0_REG = 0xFE;
+        } else if (fade_phase == 3) {
+            BGP_REG = 0xFF; //...
+            OBP0_REG = 0xFF;
+            if (title) {
+                set_bkg_data(0, 40, GameTiles);
+                set_bkg_data(41, 9, HudTilesLabel);
+                set_bkg_tiles(0, 14, HudMapLabelWidth, HudMapLabelHeight, HudMapLabel);
+            }
+            goto_level(selected_level);
+            move_sprite(0, robot.x, robot.y);
+            move_sprite(1, robot.x + 8, robot.y);
+        } else if (fade_phase == 4) {
+            BGP_REG = 0xFE; //11111001
+            OBP0_REG = 0xFE;
+        } else if (fade_phase == 5) {
+            BGP_REG = 0xF9; //11111001
+            OBP0_REG = 0xF9;
+        } else if (fade_phase == 6) {
+            BGP_REG = 0xE4; //11100100
+            OBP0_REG = 0xE4;
+        } else if (fade_phase == 7) {
+            break;
+        }
+        wait_vbl_done();
+    }
+}
+
 void game(){
 
     uint8_t game_state = 0;
-    uint8_t current_level = 1;
+    uint8_t previous_game_state = 0;
+    BOOLEAN fading_black = FALSE;
+    
 
-
-    struct interact robot;
     robot.x = 24;
     robot.y = 32;
 
-    update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
 
     SPRITES_8x16;
-    set_bkg_data(0, 40, GameTiles);
+    
+
     set_sprite_data(0, 4 , MainSpriteLabel);
     set_sprite_tile(0, 1);
     move_sprite(0, robot.x, 64);
@@ -146,6 +218,12 @@ void game(){
 
     while(1) {
 
+    if (current_level == 1) {
+        set_bkg_tiles(0,0, 1,1, BlankTile);
+    } else if (current_level == 2) {
+        set_bkg_tiles(0,0, 1,1, ExitTile);
+    }
+    previous_game_state = game_state;
     prev_joy_inp = joy_inp;
     joy_inp = joypad();
 
@@ -155,6 +233,8 @@ void game(){
             if (!pressing_up) {
                 switch (canplayermove(robot.x, robot.y - 16)){
                 case 0:
+                    squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+                    pressing_up = TRUE;
                     break;
                 case 1:
                     squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
@@ -165,7 +245,8 @@ void game(){
                     noise_play(0x2D,0x67,0x01,0x80);
                     robot.y -= 16;
                     pressing_up = TRUE;
-                    update_level_map(BaseBG, BaseBGWidth, BaseBGHeight);
+                    game_state = 2;
+                    fading_black = TRUE;
                     break;
                 }
             }
@@ -175,10 +256,23 @@ void game(){
 
         if (joy_inp & J_DOWN) {     
             if (!pressing_down) {       
-                if (canplayermove(robot.x, robot.y + 16)) {
+                switch (canplayermove(robot.x, robot.y + 16)){
+                case 0:
+                    squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+                    pressing_down = TRUE;
+                    break;
+                case 1:
                     squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
                     robot.y += 16;
                     pressing_down = TRUE;
+                    break;
+                case 2:
+                    noise_play(0x2D,0x67,0x01,0x80);
+                    robot.y += 16;
+                    pressing_down = TRUE;
+                    game_state = 2;
+                    fading_black = TRUE;
+                    break;
                 }
             }
         } else {
@@ -187,10 +281,23 @@ void game(){
 
         if (joy_inp & J_LEFT) {   
             if (!pressing_left) {
-                if (canplayermove(robot.x - 16, robot.y)) {
-                squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
-                robot.x -= 16;
-                pressing_left = TRUE;
+                switch (canplayermove(robot.x - 16, robot.y)) {
+                case 0:
+                    squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+                    pressing_left = TRUE;
+                    break;
+                case 1:
+                    squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+                    robot.x -= 16;
+                    pressing_left = TRUE;
+                    break;
+                case 2:
+                    noise_play(0x2D,0x67,0x01,0x80);
+                    robot.x -= 16;
+                    pressing_left = TRUE;
+                    game_state = 2;
+                    fading_black = TRUE;
+                    break;
                 }
             }
         } else {
@@ -199,10 +306,23 @@ void game(){
 
         if (joy_inp & J_RIGHT) {     
             if (!pressing_right) {       
-                if (canplayermove(robot.x + 16, robot.y)) {
+                switch (canplayermove(robot.x + 16, robot.y)) {
+                case 0:
+                    squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+                    pressing_right = TRUE;
+                    break;
+                case 1:
                     squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
                     robot.x += 16;
                     pressing_right = TRUE;
+                    break;
+                case 2:
+                    noise_play(0x2D,0x67,0x01,0x80);
+                    robot.x += 16;
+                    pressing_right = TRUE;
+                    game_state = 2;
+                    fading_black = TRUE;
+                    break;
                 }
             }
         } else {
@@ -223,6 +343,11 @@ void game(){
         }
         break;
 
+    // Handle level transition case
+    case 2:
+        fade_to_level(current_level + 1, FALSE);
+        game_state = 0;
+
     default:
         // Handle other game states here
         break;
@@ -238,6 +363,8 @@ void game(){
 
 void main(){
 
+    uint8_t menu_joy_inp;
+
     SHOW_BKG;
     SHOW_SPRITES;
     DISPLAY_ON;
@@ -245,6 +372,19 @@ void main(){
     NR50_REG = 0x77;
     NR51_REG = 0xFF;
 
-    game();
+    
+
+    set_bkg_data(0, 146, GBRoboLabel);
+    set_bkg_tiles(0, 0, 20, 18, GBRoboMapLabel);
+
+    while(1) {
+        menu_joy_inp = joypad();
+
+        if (menu_joy_inp & J_START) {
+            fade_to_level(1, TRUE);
+            game();
+        }
+    }
+    // game();
 
 }
