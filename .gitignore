@@ -1,3 +1,9 @@
 
 *.gb
 hitman-playaround/
+assets/Export.z80
+assets/Export.inc
+make.bat
+MazeGameGB.sav
+MazeGameGB.sav
+MazeGameGB.pal
