@@ -95,21 +95,23 @@ void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_hei
     }
     i = 0;
     GameMapWidth = new_width;
-    GameMapHeight = new_height;
+    GameMapHeight = new_height - 2;
     set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
 }
 
 void goto_level(uint8_t level) {
     if (level == 1) {
-        update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight - 2);
+        update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
         robot.x = 24;
         robot.y = 32;
     } else if (level == 2) {
-        update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight - 2);
+        update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight);
         robot.x = 88;
         robot.y = 32;
     } else if (level == 3) {
-        update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight - 2);
+        update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight);
+        robot.x = 24;
+        robot.y = 32;
     } else if (level == 4) {
         update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
         robot.x = 24;
