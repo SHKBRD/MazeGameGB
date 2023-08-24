@@ -128,39 +128,32 @@ void fade_to_level(uint8_t selected_level, BOOLEAN title) {
         fade_counter++;
         if (!(fade_counter % 4)) {
             fade_phase++;
-        }
-        if (fade_phase == 0) {
-            BGP_REG = 0xE4; //11100100
-            OBP0_REG = 0xE4;
-        } else if (fade_phase == 1) {
-            BGP_REG = 0xF9; //11111001
-            OBP0_REG = 0xF9;
-        } else if (fade_phase == 2) {
-            BGP_REG = 0xFE; //11111001
-            OBP0_REG = 0xFE;
-        } else if (fade_phase == 3) {
-            BGP_REG = 0xFF; //...
-            OBP0_REG = 0xFF;
-            if (title) {
-                set_bkg_data(0, 40, GameTiles);
-                set_bkg_data(41, 9, HudTilesLabel);
-                set_bkg_tiles(0, 14, HudMapLabelWidth, HudMapLabelHeight, HudMapLabel);
+            if (fade_phase == 3) {
+                BGP_REG = (BGP_REG >> 2) | 0b11000000; //11111001
+                OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
+                if (title) {
+                    set_bkg_data(0, 40, GameTiles);
+                    set_bkg_data(41, 9, HudTilesLabel);
+                    set_bkg_tiles(0, 14, HudMapLabelWidth, HudMapLabelHeight, HudMapLabel);
+                }
+                goto_level(selected_level);
+                move_sprite(0, robot.x, robot.y);
+                move_sprite(1, robot.x + 8, robot.y);
+                continue;
             }
-            goto_level(selected_level);
-            move_sprite(0, robot.x, robot.y);
-            move_sprite(1, robot.x + 8, robot.y);
-        } else if (fade_phase == 4) {
-            BGP_REG = 0xFE; //11111001
-            OBP0_REG = 0xFE;
-        } else if (fade_phase == 5) {
-            BGP_REG = 0xF9; //11111001
-            OBP0_REG = 0xF9;
-        } else if (fade_phase == 6) {
-            BGP_REG = 0xE4; //11100100
-            OBP0_REG = 0xE4;
-        } else if (fade_phase == 7) {
-            break;
+            if (fade_phase < 4) {
+                BGP_REG = (BGP_REG >> 2) | 0b11000000; // set first two bits to black after shifting right 
+                OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
+                continue;
+            }
+            else if (fade_phase < 7) {
+                BGP_REG = (BGP_REG << 2) | (6 - fade_phase); // 6 - fade_phase at this point would set the respective last 2 bits for each phase, 2 for phase 4, 1 for 5, 0 for 6
+                OBP0_REG = (OBP0_REG << 2) | (6 - fade_phase);
+            } else {
+                break;
+            }
         }
+        
         wait_vbl_done();
     }
 }
