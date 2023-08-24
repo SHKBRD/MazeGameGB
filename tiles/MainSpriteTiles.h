@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 16 x 16
-  Tiles                : 0 to 8
+  Tiles                : 1 to 10
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -22,10 +22,14 @@
 
 */
 
+#ifndef __MainSpriteTiles_h_INCLUDE
+#define __MainSpriteTiles_h_INCLUDE
 
 /* Bank of tiles. */
 #define MainSpriteLabelBank 0
 /* Start of tile array. */
-extern unsigned char MainSpriteLabel[];
+extern const unsigned char MainSpriteLabel[];
+
+#endif
 
 /* End of MAINSPRITETILES.H */
