@@ -18,6 +18,7 @@
 #include "maps/Map2.c"
 #include "maps/Map3.c"
 
+#include "maps/Mapblah.c"
 
 BOOLEAN paused = FALSE;
 BOOLEAN pressing_up = FALSE;
@@ -142,6 +143,8 @@ void goto_level(uint8_t level) {
         robot.y = 32;
     } else if (level == 3) {
         update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight - 2);
+    } else if (level == 4) {
+        update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
         robot.x = 24;
         robot.y = 32;
     }
