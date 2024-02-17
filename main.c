@@ -112,20 +112,16 @@ void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_hei
 void goto_level(uint8_t level) {
     if (level == 1) {
         update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
-        robot.x = 24;
-        robot.y = 32;
+        update_interact_position(robot, 24, 32);
     } else if (level == 2) {
         update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight);
-        robot.x = 88;
-        robot.y = 32;
+        update_interact_position(robot, 88, 32);
     } else if (level == 3) {
         update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight);
-        robot.x = 24;
-        robot.y = 32;
+        update_interact_position(robot, 24, 32);
     } else if (level == 4) {
         update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
-        robot.x = 24;
-        robot.y = 32;
+        update_interact_position(robot, 24, 32);
     }
     current_level = level;
 }
@@ -299,21 +295,25 @@ void play_input() {
     
 }
 
+void update_interact_position(struct interact obj, uint8_t x, uint8_t y) {
+    obj.x = x;
+    obj.y = y;
+}
+
 void game(){
     game_state = 0;
     previous_game_state = 0;
     fading_black = FALSE;
 
-    robot.x = 24;
-    robot.y = 32;
+    update_interact_position(robot, 24, 64);
 
     SPRITES_8x16;
     
     set_sprite_data(0, 4 , MainSpriteLabel);
     set_sprite_tile(0, 1);
-    move_sprite(0, robot.x, 64);
+    move_sprite(0, robot.x, robot.y);
     set_sprite_tile(1, 2);
-    move_sprite(1, robot.x + 8, 64);
+    move_sprite(1, robot.x + 8, robot.y);
 
     joy_inp = joypad();
     prev_joy_inp = joy_inp;
