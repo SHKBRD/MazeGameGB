@@ -109,19 +109,24 @@ void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_hei
     set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
 }
 
+void update_interact_position(struct interact* obj, uint8_t x, uint8_t y) {
+    obj->x = x;
+    obj->y = y;
+}
+
 void goto_level(uint8_t level) {
     if (level == 1) {
         update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
-        update_interact_position(robot, 24, 32);
+        update_interact_position(&robot, 24, 64);
     } else if (level == 2) {
         update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight);
-        update_interact_position(robot, 88, 32);
+        update_interact_position(&robot, 88, 32);
     } else if (level == 3) {
         update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight);
-        update_interact_position(robot, 24, 32);
+        update_interact_position(&robot, 24, 32);
     } else if (level == 4) {
         update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
-        update_interact_position(robot, 24, 32);
+        update_interact_position(&robot, 24, 32);
     }
     current_level = level;
 }
@@ -295,17 +300,12 @@ void play_input() {
     
 }
 
-void update_interact_position(struct interact obj, uint8_t x, uint8_t y) {
-    obj.x = x;
-    obj.y = y;
-}
-
 void game(){
     game_state = 0;
     previous_game_state = 0;
     fading_black = FALSE;
 
-    update_interact_position(robot, 24, 64);
+    update_interact_position(&robot, 24, 64);
 
     SPRITES_8x16;
     
