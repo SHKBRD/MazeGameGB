@@ -319,11 +319,6 @@ void game(){
     prev_joy_inp = joy_inp;
 
     while(1) {
-    if (current_level == 1) {
-        set_bkg_tiles(0,0, 1,1, BlankTile);
-    } else if (current_level == 2) {
-        set_bkg_tiles(0,0, 1,1, ExitTile);
-    }
     previous_game_state = game_state;
     prev_joy_inp = joy_inp;
     joy_inp = joypad();
