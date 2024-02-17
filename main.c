@@ -35,6 +35,30 @@ unsigned char GameMap[320];
 uint8_t GameMapWidth = 20;
 uint8_t GameMapHeight = 16;
 
+const unsigned char* maps[] = 
+{
+    Map1Label,
+    Map2Label,
+    Map3Label,
+    MapblahLabel
+};
+
+const uint8_t mapDims[] = 
+{
+    Map1LabelWidth, Map1LabelHeight,
+    Map2LabelWidth, Map1LabelHeight,
+    Map3LabelWidth, Map1LabelHeight,
+    MapblahLabelWidth, MapblahLabelHeight
+};
+
+const uint8_t mapStartPos[] = 
+{
+    24, 64,
+    88, 32,
+    24, 32,
+    24, 32
+};
+
 const unsigned char freq_vals[] = 
 {
     0x21,
@@ -97,7 +121,7 @@ uint8_t canplayermove(uint8_t playerX, uint8_t playerY){
     return result;
 }
 
-void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_height){
+void update_level_map(const unsigned char new_BG[], uint8_t new_width, uint8_t new_height){
     uint16_t i;
     for (i=0; i<320; ++i) 
     {
@@ -115,19 +139,8 @@ void update_interact_position(struct interact* obj, uint8_t x, uint8_t y) {
 }
 
 void goto_level(uint8_t level) {
-    if (level == 1) {
-        update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
-        update_interact_position(&robot, 24, 64);
-    } else if (level == 2) {
-        update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight);
-        update_interact_position(&robot, 88, 32);
-    } else if (level == 3) {
-        update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight);
-        update_interact_position(&robot, 24, 32);
-    } else if (level == 4) {
-        update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
-        update_interact_position(&robot, 24, 32);
-    }
+    update_level_map(maps[level], mapDims[level*2], mapDims[(level*2)+1]);
+    update_interact_position(&robot, mapStartPos[level*2], mapStartPos[(level*2)+1]);
     current_level = level;
 }
 
@@ -348,7 +361,7 @@ void main(){
         joy_inp = joypad();
 
         if (joy_inp & J_START) {
-            fade_to_level(1, TRUE);
+            fade_to_level(0, TRUE);
             game();
         }
     }
