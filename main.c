@@ -24,7 +24,12 @@ BOOLEAN pressing_up = FALSE;
 BOOLEAN pressing_down = FALSE;
 BOOLEAN pressing_left = FALSE;
 BOOLEAN pressing_right = FALSE;
+uint8_t joy_inp = 0;
+uint8_t prev_joy_inp = 0;
+uint8_t game_state = 0;
+uint8_t previous_game_state = 0;
 uint8_t frame_counter = 0; 
+BOOLEAN fading_black = FALSE;
 
 unsigned char GameMap[320];
 uint8_t GameMapWidth = 20;
@@ -163,42 +168,10 @@ void fade_to_level(uint8_t selected_level, BOOLEAN title) {
     }
 }
 
-void game(){
-
-    uint8_t game_state = 0;
-    uint8_t previous_game_state = 0;
-    BOOLEAN fading_black = FALSE;
-    
-
-    robot.x = 24;
-    robot.y = 32;
-
-
-    SPRITES_8x16;
-    
-
-    set_sprite_data(0, 4 , MainSpriteLabel);
-    set_sprite_tile(0, 1);
-    move_sprite(0, robot.x, 64);
-    set_sprite_tile(1, 2);
-    move_sprite(1, robot.x + 8, 64);
-
-    uint8_t joy_inp = joypad();
-    uint8_t prev_joy_inp = joy_inp;
-
-    while(1) {
-
-    if (current_level == 1) {
-        set_bkg_tiles(0,0, 1,1, BlankTile);
-    } else if (current_level == 2) {
-        set_bkg_tiles(0,0, 1,1, ExitTile);
-    }
-    previous_game_state = game_state;
-    prev_joy_inp = joy_inp;
-    joy_inp = joypad();
+void play_input() {
 
     switch (game_state) {
-    case 0:
+        case 0:
         if (joy_inp & J_UP) {   
             if (!pressing_up) {
                 switch (canplayermove(robot.x, robot.y - 16)){
@@ -304,24 +277,58 @@ void game(){
             set_bkg_tiles(0, 0, 2, 2, BaseBG);
         }
         break;
-    
-    // Handle paused case
-    case 1:
-        if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+
+        // Handle paused case
+        case 1:
+            if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+                game_state = 0;
+                set_bkg_tiles(2, 0, 2, 2, BaseBG);
+            }
+            break;
+
+        // Handle level transition case
+        case 2:
+            fade_to_level(current_level + 1, FALSE);
             game_state = 0;
-            set_bkg_tiles(2, 0, 2, 2, BaseBG);
-        }
-        break;
 
-    // Handle level transition case
-    case 2:
-        fade_to_level(current_level + 1, FALSE);
-        game_state = 0;
+        default:
+            // Handle other game states here
+            break;
+    }
 
-    default:
-        // Handle other game states here
-        break;
+    
 }
+
+void game(){
+    game_state = 0;
+    previous_game_state = 0;
+    fading_black = FALSE;
+
+    robot.x = 24;
+    robot.y = 32;
+
+    SPRITES_8x16;
+    
+    set_sprite_data(0, 4 , MainSpriteLabel);
+    set_sprite_tile(0, 1);
+    move_sprite(0, robot.x, 64);
+    set_sprite_tile(1, 2);
+    move_sprite(1, robot.x + 8, 64);
+
+    joy_inp = joypad();
+    prev_joy_inp = joy_inp;
+
+    while(1) {
+    if (current_level == 1) {
+        set_bkg_tiles(0,0, 1,1, BlankTile);
+    } else if (current_level == 2) {
+        set_bkg_tiles(0,0, 1,1, ExitTile);
+    }
+    previous_game_state = game_state;
+    prev_joy_inp = joy_inp;
+    joy_inp = joypad();
+
+    play_input();
 
     move_sprite(0, robot.x, robot.y);
     move_sprite(1, robot.x + 8, robot.y);
@@ -332,9 +339,6 @@ void game(){
 }
 
 void main(){
-
-    uint8_t menu_joy_inp;
-
     SHOW_BKG;
     SHOW_SPRITES;
     DISPLAY_ON;
@@ -342,15 +346,13 @@ void main(){
     NR50_REG = 0x77;
     NR51_REG = 0xFF;
 
-    
-
     set_bkg_data(0, 146, GBRoboLabel);
     set_bkg_tiles(0, 0, 20, 18, GBRoboMapLabel);
 
     while(1) {
-        menu_joy_inp = joypad();
+        joy_inp = joypad();
 
-        if (menu_joy_inp & J_START) {
+        if (joy_inp & J_START) {
             fade_to_level(1, TRUE);
             game();
         }

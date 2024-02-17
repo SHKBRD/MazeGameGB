@@ -10,6 +10,7 @@
 ;--------------------------------------------------------
 	.globl _main
 	.globl _game
+	.globl _play_input
 	.globl _fade_to_level
 	.globl _goto_level
 	.globl _update_level_map
@@ -24,7 +25,12 @@
 	.globl _current_level
 	.globl _GameMapHeight
 	.globl _GameMapWidth
+	.globl _fading_black
 	.globl _frame_counter
+	.globl _previous_game_state
+	.globl _game_state
+	.globl _prev_joy_inp
+	.globl _joy_inp
 	.globl _pressing_right
 	.globl _pressing_left
 	.globl _pressing_down
@@ -80,7 +86,17 @@ _pressing_left::
 	.ds 1
 _pressing_right::
 	.ds 1
+_joy_inp::
+	.ds 1
+_prev_joy_inp::
+	.ds 1
+_game_state::
+	.ds 1
+_previous_game_state::
+	.ds 1
 _frame_counter::
+	.ds 1
+_fading_black::
 	.ds 1
 _GameMapWidth::
 	.ds 1
@@ -108,7 +124,7 @@ _current_level::
 ; code
 ;--------------------------------------------------------
 	.area _CODE
-;main.c:59: void squareone_play(uint8_t reg0, uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
+;main.c:64: void squareone_play(uint8_t reg0, uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
 ;	---------------------------------
 ; Function squareone_play
 ; ---------------------------------
@@ -116,17 +132,17 @@ _squareone_play::
 	ldh	(_NR10_REG + 0), a
 	ld	a, e
 	ldh	(_NR11_REG + 0), a
-;main.c:62: NR12_REG = reg2;
+;main.c:67: NR12_REG = reg2;
 	ldhl	sp,	#2
-;main.c:63: NR13_REG = reg3;
+;main.c:68: NR13_REG = reg3;
 	ld	a, (hl+)
 	ldh	(_NR12_REG + 0), a
-;main.c:64: NR14_REG = reg4;
+;main.c:69: NR14_REG = reg4;
 	ld	a, (hl+)
 	ldh	(_NR13_REG + 0), a
 	ld	a, (hl)
 	ldh	(_NR14_REG + 0), a
-;main.c:65: }
+;main.c:70: }
 	pop	hl
 	add	sp, #3
 	jp	(hl)
@@ -5324,7 +5340,7 @@ _freq_vals:
 	.db #0xa1	; 161
 	.db #0xc1	; 193
 	.db #0xf1	; 241
-;main.c:67: void noise_play(uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
+;main.c:72: void noise_play(uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
 ;	---------------------------------
 ; Function noise_play
 ; ---------------------------------
@@ -5332,18 +5348,18 @@ _noise_play::
 	ldh	(_NR41_REG + 0), a
 	ld	a, e
 	ldh	(_NR42_REG + 0), a
-;main.c:70: NR43_REG = reg3;
+;main.c:75: NR43_REG = reg3;
 	ldhl	sp,	#2
-;main.c:71: NR44_REG = reg4;
+;main.c:76: NR44_REG = reg4;
 	ld	a, (hl+)
 	ldh	(_NR43_REG + 0), a
 	ld	a, (hl)
 	ldh	(_NR44_REG + 0), a
-;main.c:72: }
+;main.c:77: }
 	pop	hl
 	pop	af
 	jp	(hl)
-;main.c:74: uint8_t canplayermove(uint8_t playerX, uint8_t playerY){ 
+;main.c:79: uint8_t canplayermove(uint8_t playerX, uint8_t playerY){ 
 ;	---------------------------------
 ; Function canplayermove
 ; ---------------------------------
@@ -5352,7 +5368,7 @@ _canplayermove::
 	ld	c, a
 	ldhl	sp,	#5
 	ld	(hl), e
-;main.c:78: indexTLx = (playerX - 8) / 8;
+;main.c:83: indexTLx = (playerX - 8) / 8;
 	ldhl	sp,	#1
 	ld	a, c
 	ld	(hl+), a
@@ -5394,7 +5410,7 @@ _canplayermove::
 	rr	c
 	ldhl	sp,	#0
 	ld	(hl), c
-;main.c:79: indexTLy = (playerY - 16) / 8;
+;main.c:84: indexTLy = (playerY - 16) / 8;
 	ldhl	sp,	#5
 	ld	a, (hl)
 	ldhl	sp,	#1
@@ -5435,7 +5451,7 @@ _canplayermove::
 	rr	c
 	sra	b
 	rr	c
-;main.c:80: tileindexTL = 20 * indexTLy + indexTLx;
+;main.c:85: tileindexTL = 20 * indexTLy + indexTLx;
 	ld	b, #0x00
 	ld	l, c
 	ld	h, b
@@ -5454,7 +5470,7 @@ _canplayermove::
 	ld	a, e
 	adc	a, b
 	ld	b, a
-;main.c:82: if ((GameMap[tileindexTL] >= 0x04 && GameMap[tileindexTL] <= 0x07) || (GameMap[tileindexTL] >= 0x20 && GameMap[tileindexTL] <= 0x23)) {
+;main.c:87: if ((GameMap[tileindexTL] >= 0x04 && GameMap[tileindexTL] <= 0x07) || (GameMap[tileindexTL] >= 0x20 && GameMap[tileindexTL] <= 0x23)) {
 	ld	hl, #_GameMap
 	add	hl, bc
 	ld	c, (hl)
@@ -5472,29 +5488,29 @@ _canplayermove::
 	sub	a, c
 	jr	C, 00106$
 00105$:
-;main.c:83: result = 1;
+;main.c:88: result = 1;
 	ld	a, #0x01
 	jr	00107$
 00106$:
-;main.c:85: } else if ((GameMap[tileindexTL] >= 0x14 && GameMap[tileindexTL] <= 0x17)){
+;main.c:90: } else if ((GameMap[tileindexTL] >= 0x14 && GameMap[tileindexTL] <= 0x17)){
 	ld	a, c
 	sub	a, #0x14
 	jr	C, 00102$
 	ld	a, #0x17
 	sub	a, c
 	jr	C, 00102$
-;main.c:86: result = 2;
+;main.c:91: result = 2;
 	ld	a, #0x02
 	jr	00107$
 00102$:
-;main.c:89: result = 0;
+;main.c:94: result = 0;
 	xor	a, a
 00107$:
-;main.c:92: return result;
-;main.c:93: }
+;main.c:97: return result;
+;main.c:98: }
 	add	sp, #6
 	ret
-;main.c:95: void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_height){
+;main.c:100: void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_height){
 ;	---------------------------------
 ; Function update_level_map
 ; ---------------------------------
@@ -5507,10 +5523,10 @@ _update_level_map::
 	dec	hl
 	dec	hl
 	ld	(hl), a
-;main.c:97: for (i=0; i<320; ++i) 
+;main.c:102: for (i=0; i<320; ++i) 
 	ld	bc, #0x0000
 00102$:
-;main.c:99: GameMap[i] = new_BG[i];
+;main.c:104: GameMap[i] = new_BG[i];
 	ld	hl, #_GameMap
 	add	hl, bc
 	inc	sp
@@ -5527,7 +5543,7 @@ _update_level_map::
 	pop	hl
 	push	hl
 	ld	(hl), a
-;main.c:97: for (i=0; i<320; ++i) 
+;main.c:102: for (i=0; i<320; ++i) 
 	inc	bc
 	ld	e, c
 	ld	d, b
@@ -5536,17 +5552,17 @@ _update_level_map::
 	ld	a, d
 	sbc	a, #0x01
 	jr	C, 00102$
-;main.c:102: GameMapWidth = new_width;
+;main.c:107: GameMapWidth = new_width;
 	ldhl	sp,	#2
 	ld	a, (hl)
 	ld	(#_GameMapWidth),a
-;main.c:103: GameMapHeight = new_height - 2;
+;main.c:108: GameMapHeight = new_height - 2;
 	ldhl	sp,	#7
 	ld	a, (hl)
 	add	a, #0xfe
 	ld	hl, #_GameMapHeight
 	ld	(hl), a
-;main.c:104: set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
+;main.c:109: set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
 	ld	de, #_GameMap
 	push	de
 	ld	a, (hl)
@@ -5561,21 +5577,21 @@ _update_level_map::
 	xor	a, a
 	call	_set_bkg_tiles
 	add	sp, #6
-;main.c:105: }
+;main.c:110: }
 	add	sp, #5
 	pop	hl
 	inc	sp
 	jp	(hl)
-;main.c:107: void goto_level(uint8_t level) {
+;main.c:112: void goto_level(uint8_t level) {
 ;	---------------------------------
 ; Function goto_level
 ; ---------------------------------
 _goto_level::
-;main.c:108: if (level == 1) {
+;main.c:113: if (level == 1) {
 	ld	c, a
 	dec	a
 	jr	NZ, 00110$
-;main.c:109: update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
+;main.c:114: update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
 	ld	de, #_Map1Label+0
 	push	bc
 	ld	a, #0x10
@@ -5584,19 +5600,19 @@ _goto_level::
 	ld	a, #0x14
 	call	_update_level_map
 	pop	bc
-;main.c:110: robot.x = 24;
+;main.c:115: robot.x = 24;
 	ld	hl, #_robot
 	ld	(hl), #0x18
-;main.c:111: robot.y = 32;
+;main.c:116: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
 	jr	00111$
 00110$:
-;main.c:112: } else if (level == 2) {
+;main.c:117: } else if (level == 2) {
 	ld	a, c
 	sub	a, #0x02
 	jr	NZ, 00107$
-;main.c:113: update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight);
+;main.c:118: update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight);
 	push	bc
 	ld	a, #0x10
 	push	af
@@ -5605,19 +5621,19 @@ _goto_level::
 	ld	de, #_Map2Label
 	call	_update_level_map
 	pop	bc
-;main.c:114: robot.x = 88;
+;main.c:119: robot.x = 88;
 	ld	hl, #_robot
 	ld	(hl), #0x58
-;main.c:115: robot.y = 32;
+;main.c:120: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
 	jr	00111$
 00107$:
-;main.c:116: } else if (level == 3) {
+;main.c:121: } else if (level == 3) {
 	ld	a, c
 	sub	a, #0x03
 	jr	NZ, 00104$
-;main.c:117: update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight);
+;main.c:122: update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight);
 	push	bc
 	ld	a, #0x10
 	push	af
@@ -5626,19 +5642,19 @@ _goto_level::
 	ld	de, #_Map3Label
 	call	_update_level_map
 	pop	bc
-;main.c:118: robot.x = 24;
+;main.c:123: robot.x = 24;
 	ld	hl, #_robot
 	ld	(hl), #0x18
-;main.c:119: robot.y = 32;
+;main.c:124: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
 	jr	00111$
 00104$:
-;main.c:120: } else if (level == 4) {
+;main.c:125: } else if (level == 4) {
 	ld	a, c
 	sub	a, #0x04
 	jr	NZ, 00111$
-;main.c:121: update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
+;main.c:126: update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
 	push	bc
 	ld	a, #0x10
 	push	af
@@ -5647,19 +5663,19 @@ _goto_level::
 	ld	de, #_MapblahLabel
 	call	_update_level_map
 	pop	bc
-;main.c:122: robot.x = 24;
+;main.c:127: robot.x = 24;
 	ld	hl, #_robot
 	ld	(hl), #0x18
-;main.c:123: robot.y = 32;
+;main.c:128: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
 00111$:
-;main.c:125: current_level = level;
+;main.c:130: current_level = level;
 	ld	hl, #_current_level
 	ld	(hl), c
-;main.c:126: }
+;main.c:131: }
 	ret
-;main.c:128: void fade_to_level(uint8_t selected_level, BOOLEAN title) {
+;main.c:133: void fade_to_level(uint8_t selected_level, BOOLEAN title) {
 ;	---------------------------------
 ; Function fade_to_level
 ; ---------------------------------
@@ -5667,7 +5683,7 @@ _fade_to_level::
 	add	sp, #-4
 	ldhl	sp,	#1
 	ld	(hl-), a
-;main.c:132: while(1) {
+;main.c:137: while(1) {
 	ld	a, e
 	ld	(hl+), a
 	inc	hl
@@ -5675,54 +5691,54 @@ _fade_to_level::
 	ld	(hl+), a
 	ld	(hl), a
 00114$:
-;main.c:133: fade_counter++;
+;main.c:138: fade_counter++;
 	ldhl	sp,	#3
 	inc	(hl)
-;main.c:134: if (!(fade_counter % 4)) {
+;main.c:139: if (!(fade_counter % 4)) {
 	ld	a, (hl)
 	and	a, #0x03
 	jp	NZ,00112$
-;main.c:135: fade_phase++;
+;main.c:140: fade_phase++;
 	ldhl	sp,	#2
 	inc	(hl)
-;main.c:136: if (fade_phase == 3) {
+;main.c:141: if (fade_phase == 3) {
 	ld	a, (hl)
 	sub	a, #0x03
 	jr	NZ, 00104$
-;main.c:137: BGP_REG = (BGP_REG >> 2) | 0b11000000; //11111001
+;main.c:142: BGP_REG = (BGP_REG >> 2) | 0b11000000; //11111001
 	ldh	a, (_BGP_REG + 0)
 	rrca
 	rrca
 	and	a, #0x3f
 	or	a, #0xc0
 	ldh	(_BGP_REG + 0), a
-;main.c:138: OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
+;main.c:143: OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
 	ldh	a, (_OBP0_REG + 0)
 	rrca
 	rrca
 	and	a, #0x3f
 	or	a, #0xc0
 	ldh	(_OBP0_REG + 0), a
-;main.c:139: if (title) {
+;main.c:144: if (title) {
 	ldhl	sp,	#0
 	ld	a, (hl)
 	or	a, a
 	jr	Z, 00102$
-;main.c:140: set_bkg_data(0, 40, GameTiles);
+;main.c:145: set_bkg_data(0, 40, GameTiles);
 	ld	de, #_GameTiles
 	push	de
 	ld	hl, #0x2800
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-;main.c:141: set_bkg_data(41, 9, HudTilesLabel);
+;main.c:146: set_bkg_data(41, 9, HudTilesLabel);
 	ld	de, #_HudTilesLabel
 	push	de
 	ld	hl, #0x929
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-;main.c:142: set_bkg_tiles(0, 14, HudMapLabelWidth, HudMapLabelHeight, HudMapLabel);
+;main.c:147: set_bkg_tiles(0, 14, HudMapLabelWidth, HudMapLabelHeight, HudMapLabel);
 	ld	de, #_HudMapLabel
 	push	de
 	ld	hl, #0x414
@@ -5732,11 +5748,11 @@ _fade_to_level::
 	call	_set_bkg_tiles
 	add	sp, #6
 00102$:
-;main.c:144: goto_level(selected_level);
+;main.c:149: goto_level(selected_level);
 	ldhl	sp,	#1
 	ld	a, (hl)
 	call	_goto_level
-;main.c:145: move_sprite(0, robot.x, robot.y);
+;main.c:150: move_sprite(0, robot.x, robot.y);
 	ld	hl, #(_robot + 1)
 	ld	c, (hl)
 	ld	hl, #_robot
@@ -5747,7 +5763,7 @@ _fade_to_level::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:146: move_sprite(1, robot.x + 8, robot.y);
+;main.c:151: move_sprite(1, robot.x + 8, robot.y);
 	ld	hl, #(_robot + 1)
 	ld	c, (hl)
 	ld	a, (#_robot + 0)
@@ -5759,37 +5775,37 @@ _fade_to_level::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:147: continue;
+;main.c:152: continue;
 	jr	00114$
 00104$:
-;main.c:149: if (fade_phase < 4) {
+;main.c:154: if (fade_phase < 4) {
 	ldhl	sp,	#2
 	ld	a, (hl)
 	sub	a, #0x04
 	jr	NC, 00109$
-;main.c:150: BGP_REG = (BGP_REG >> 2) | 0b11000000; // set first two bits to black after shifting right 
+;main.c:155: BGP_REG = (BGP_REG >> 2) | 0b11000000; // set first two bits to black after shifting right 
 	ldh	a, (_BGP_REG + 0)
 	rrca
 	rrca
 	and	a, #0x3f
 	or	a, #0xc0
 	ldh	(_BGP_REG + 0), a
-;main.c:151: OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
+;main.c:156: OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
 	ldh	a, (_OBP0_REG + 0)
 	rrca
 	rrca
 	and	a, #0x3f
 	or	a, #0xc0
 	ldh	(_OBP0_REG + 0), a
-;main.c:152: continue;
+;main.c:157: continue;
 	jp	00114$
 00109$:
-;main.c:154: else if (fade_phase < 7) {
+;main.c:159: else if (fade_phase < 7) {
 	ldhl	sp,	#2
 	ld	a, (hl)
 	sub	a, #0x07
 	jr	NC, 00118$
-;main.c:155: BGP_REG = (BGP_REG << 2) | (6 - fade_phase); // 6 - fade_phase at this point would set the respective last 2 bits for each phase, 2 for phase 4, 1 for 5, 0 for 6
+;main.c:160: BGP_REG = (BGP_REG << 2) | (6 - fade_phase); // 6 - fade_phase at this point would set the respective last 2 bits for each phase, 2 for phase 4, 1 for 5, 0 for 6
 	ldh	a, (_BGP_REG + 0)
 	add	a, a
 	add	a, a
@@ -5800,41 +5816,592 @@ _fade_to_level::
 	ld	b,a
 	or	a,c
 	ldh	(_BGP_REG + 0), a
-;main.c:156: OBP0_REG = (OBP0_REG << 2) | (6 - fade_phase);
+;main.c:161: OBP0_REG = (OBP0_REG << 2) | (6 - fade_phase);
 	ldh	a, (_OBP0_REG + 0)
 	add	a, a
 	add	a, a
 	or	a, b
 	ldh	(_OBP0_REG + 0), a
-;main.c:158: break;
+;main.c:163: break;
 00112$:
-;main.c:162: wait_vbl_done();
+;main.c:167: wait_vbl_done();
 	call	_wait_vbl_done
 	jp	00114$
 00118$:
-;main.c:164: }
+;main.c:169: }
 	add	sp, #4
 	ret
-;main.c:166: void game(){
+;main.c:171: void play_input() {
+;	---------------------------------
+; Function play_input
+; ---------------------------------
+_play_input::
+;main.c:175: if (joy_inp & J_UP) {   
+	ld	hl, #_joy_inp
+	ld	c, (hl)
+;main.c:173: switch (game_state) {
+	ld	a, (#_game_state)
+	or	a, a
+	jr	Z, 00101$
+	ld	a, (#_game_state)
+	dec	a
+	jp	Z,00141$
+	ld	a, (#_game_state)
+	sub	a, #0x02
+	jp	Z,00145$
+	ret
+;main.c:174: case 0:
+00101$:
+;main.c:175: if (joy_inp & J_UP) {   
+	bit	2, c
+	jp	Z,00109$
+;main.c:176: if (!pressing_up) {
+	ld	a, (#_pressing_up)
+	or	a, a
+	jp	NZ, 00110$
+;main.c:177: switch (canplayermove(robot.x, robot.y - 16)){
+	ld	a, (#(_robot + 1) + 0)
+	add	a, #0xf0
+	ld	b, a
+	ld	hl, #_robot
+	ld	c, (hl)
+	ld	e, b
+	ld	a, c
+	call	_canplayermove
+	ld	e, a
+;main.c:179: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_frame_counter
+	ld	l, (hl)
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	d, #0x00
+	push	de
+	ld	bc, #0x0007
+	ld	e, l
+;main.c:177: switch (canplayermove(robot.x, robot.y - 16)){
+	call	__modsint
+	pop	de
+	ld	a, e
+	or	a, a
+	jr	Z, 00102$
+	ld	a, e
+	dec	a
+	jr	Z, 00103$
+	ld	a, e
+	sub	a, #0x02
+	jr	Z, 00104$
+	jr	00110$
+;main.c:178: case 0:
+00102$:
+;main.c:179: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x85
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x44
+	push	hl
+	ld	e, #0x41
+	ld	a, #0x79
+	call	_squareone_play
+;main.c:180: pressing_up = TRUE;
+	ld	hl, #_pressing_up
+	ld	(hl), #0x01
+;main.c:181: break;
+	jr	00110$
+;main.c:182: case 1:
+00103$:
+;main.c:183: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x86
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x26
+	push	hl
+	ld	e, #0x80
+	ld	a, #0x08
+	call	_squareone_play
+;main.c:184: robot.y -= 16;
+	ld	a, (#(_robot + 1) + 0)
+	add	a, #0xf0
+	ld	(#(_robot + 1)),a
+;main.c:185: pressing_up = TRUE;
+	ld	hl, #_pressing_up
+	ld	(hl), #0x01
+;main.c:186: break;
+	jr	00110$
+;main.c:187: case 2:
+00104$:
+;main.c:188: noise_play(0x2D,0x67,0x01,0x80);
+	ld	hl, #0x8001
+	push	hl
+	ld	e, #0x67
+	ld	a, #0x2d
+	call	_noise_play
+;main.c:189: robot.y -= 16;
+	ld	a, (#(_robot + 1) + 0)
+	add	a, #0xf0
+	ld	(#(_robot + 1)),a
+;main.c:190: pressing_up = TRUE;
+	ld	hl, #_pressing_up
+	ld	(hl), #0x01
+;main.c:191: game_state = 2;
+	ld	hl, #_game_state
+	ld	(hl), #0x02
+;main.c:192: fading_black = TRUE;
+	ld	hl, #_fading_black
+	ld	(hl), #0x01
+;main.c:194: }
+	jr	00110$
+00109$:
+;main.c:197: pressing_up = FALSE;
+	ld	hl, #_pressing_up
+	ld	(hl), #0x00
+00110$:
+;main.c:200: if (joy_inp & J_DOWN) {     
+	ld	a, (#_joy_inp)
+	bit	3, a
+	jp	Z,00118$
+;main.c:201: if (!pressing_down) {       
+	ld	a, (#_pressing_down)
+	or	a, a
+	jp	NZ, 00119$
+;main.c:202: switch (canplayermove(robot.x, robot.y + 16)){
+	ld	a, (#(_robot + 1) + 0)
+	add	a, #0x10
+	ld	b, a
+	ld	hl, #_robot
+	ld	c, (hl)
+	ld	e, b
+	ld	a, c
+	call	_canplayermove
+	ld	e, a
+;main.c:179: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_frame_counter
+	ld	l, (hl)
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	d, #0x00
+	push	de
+	ld	bc, #0x0007
+	ld	e, l
+;main.c:202: switch (canplayermove(robot.x, robot.y + 16)){
+	call	__modsint
+	pop	de
+	ld	a, e
+	or	a, a
+	jr	Z, 00111$
+	ld	a, e
+	dec	a
+	jr	Z, 00112$
+	ld	a, e
+	sub	a, #0x02
+	jr	Z, 00113$
+	jr	00119$
+;main.c:203: case 0:
+00111$:
+;main.c:204: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x85
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x44
+	push	hl
+	ld	e, #0x41
+	ld	a, #0x79
+	call	_squareone_play
+;main.c:205: pressing_down = TRUE;
+	ld	hl, #_pressing_down
+	ld	(hl), #0x01
+;main.c:206: break;
+	jr	00119$
+;main.c:207: case 1:
+00112$:
+;main.c:208: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x86
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x26
+	push	hl
+	ld	e, #0x80
+	ld	a, #0x08
+	call	_squareone_play
+;main.c:209: robot.y += 16;
+	ld	a, (#(_robot + 1) + 0)
+	add	a, #0x10
+	ld	(#(_robot + 1)),a
+;main.c:210: pressing_down = TRUE;
+	ld	hl, #_pressing_down
+	ld	(hl), #0x01
+;main.c:211: break;
+	jr	00119$
+;main.c:212: case 2:
+00113$:
+;main.c:213: noise_play(0x2D,0x67,0x01,0x80);
+	ld	hl, #0x8001
+	push	hl
+	ld	e, #0x67
+	ld	a, #0x2d
+	call	_noise_play
+;main.c:214: robot.y += 16;
+	ld	a, (#(_robot + 1) + 0)
+	add	a, #0x10
+	ld	(#(_robot + 1)),a
+;main.c:215: pressing_down = TRUE;
+	ld	hl, #_pressing_down
+	ld	(hl), #0x01
+;main.c:216: game_state = 2;
+	ld	hl, #_game_state
+	ld	(hl), #0x02
+;main.c:217: fading_black = TRUE;
+	ld	hl, #_fading_black
+	ld	(hl), #0x01
+;main.c:219: }
+	jr	00119$
+00118$:
+;main.c:222: pressing_down = FALSE;
+	ld	hl, #_pressing_down
+	ld	(hl), #0x00
+00119$:
+;main.c:225: if (joy_inp & J_LEFT) {   
+	ld	a, (#_joy_inp)
+	bit	1, a
+	jp	Z,00127$
+;main.c:226: if (!pressing_left) {
+	ld	a, (#_pressing_left)
+	or	a, a
+	jp	NZ, 00128$
+;main.c:227: switch (canplayermove(robot.x - 16, robot.y)) {
+	ld	hl, #_robot + 1
+	ld	b, (hl)
+	ld	a, (#_robot + 0)
+	add	a, #0xf0
+	ld	e, b
+	call	_canplayermove
+	ld	e, a
+;main.c:179: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_frame_counter
+	ld	l, (hl)
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	d, #0x00
+	push	de
+	ld	bc, #0x0007
+	ld	e, l
+;main.c:227: switch (canplayermove(robot.x - 16, robot.y)) {
+	call	__modsint
+	pop	de
+	ld	a, e
+	or	a, a
+	jr	Z, 00120$
+	ld	a, e
+	dec	a
+	jr	Z, 00121$
+	ld	a, e
+	sub	a, #0x02
+	jr	Z, 00122$
+	jr	00128$
+;main.c:228: case 0:
+00120$:
+;main.c:229: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x85
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x44
+	push	hl
+	ld	e, #0x41
+	ld	a, #0x79
+	call	_squareone_play
+;main.c:230: pressing_left = TRUE;
+	ld	hl, #_pressing_left
+	ld	(hl), #0x01
+;main.c:231: break;
+	jr	00128$
+;main.c:232: case 1:
+00121$:
+;main.c:233: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x86
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x26
+	push	hl
+	ld	e, #0x80
+	ld	a, #0x08
+	call	_squareone_play
+;main.c:234: robot.x -= 16;
+	ld	a, (#_robot + 0)
+	add	a, #0xf0
+	ld	(#_robot),a
+;main.c:235: pressing_left = TRUE;
+	ld	hl, #_pressing_left
+	ld	(hl), #0x01
+;main.c:236: break;
+	jr	00128$
+;main.c:237: case 2:
+00122$:
+;main.c:238: noise_play(0x2D,0x67,0x01,0x80);
+	ld	hl, #0x8001
+	push	hl
+	ld	e, #0x67
+	ld	a, #0x2d
+	call	_noise_play
+;main.c:239: robot.x -= 16;
+	ld	a, (#_robot + 0)
+	add	a, #0xf0
+	ld	(#_robot),a
+;main.c:240: pressing_left = TRUE;
+	ld	hl, #_pressing_left
+	ld	(hl), #0x01
+;main.c:241: game_state = 2;
+	ld	hl, #_game_state
+	ld	(hl), #0x02
+;main.c:242: fading_black = TRUE;
+	ld	hl, #_fading_black
+	ld	(hl), #0x01
+;main.c:244: }
+	jr	00128$
+00127$:
+;main.c:247: pressing_left = FALSE;
+	ld	hl, #_pressing_left
+	ld	(hl), #0x00
+00128$:
+;main.c:250: if (joy_inp & J_RIGHT) {     
+	ld	a, (#_joy_inp)
+	rrca
+	jp	NC,00136$
+;main.c:251: if (!pressing_right) {       
+	ld	a, (#_pressing_right)
+	or	a, a
+	jp	NZ, 00137$
+;main.c:252: switch (canplayermove(robot.x + 16, robot.y)) {
+	ld	hl, #(_robot + 1)
+	ld	c, (hl)
+	ld	a, (#_robot + 0)
+	add	a, #0x10
+	ld	e, c
+	call	_canplayermove
+	ld	e, a
+;main.c:179: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_frame_counter
+	ld	l, (hl)
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	d, #0x00
+	push	de
+	ld	bc, #0x0007
+	ld	e, l
+;main.c:252: switch (canplayermove(robot.x + 16, robot.y)) {
+	call	__modsint
+	pop	de
+	ld	a, e
+	or	a, a
+	jr	Z, 00129$
+	ld	a, e
+	dec	a
+	jr	Z, 00130$
+	ld	a, e
+	sub	a, #0x02
+	jr	Z, 00131$
+	jr	00137$
+;main.c:253: case 0:
+00129$:
+;main.c:254: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x85
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x44
+	push	hl
+	ld	e, #0x41
+	ld	a, #0x79
+	call	_squareone_play
+;main.c:255: pressing_right = TRUE;
+	ld	hl, #_pressing_right
+	ld	(hl), #0x01
+;main.c:256: break;
+	jr	00137$
+;main.c:257: case 1:
+00130$:
+;main.c:258: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+	ld	hl, #_freq_vals
+	add	hl, bc
+	ld	a, (hl)
+	ld	h, #0x86
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	ld	h, a
+	ld	l, #0x26
+	push	hl
+	ld	e, #0x80
+	ld	a, #0x08
+	call	_squareone_play
+;main.c:259: robot.x += 16;
+	ld	a, (#_robot + 0)
+	add	a, #0x10
+	ld	(#_robot),a
+;main.c:260: pressing_right = TRUE;
+	ld	hl, #_pressing_right
+	ld	(hl), #0x01
+;main.c:261: break;
+	jr	00137$
+;main.c:262: case 2:
+00131$:
+;main.c:263: noise_play(0x2D,0x67,0x01,0x80);
+	ld	hl, #0x8001
+	push	hl
+	ld	e, #0x67
+	ld	a, #0x2d
+	call	_noise_play
+;main.c:264: robot.x += 16;
+	ld	a, (#_robot + 0)
+	add	a, #0x10
+	ld	(#_robot),a
+;main.c:265: pressing_right = TRUE;
+	ld	hl, #_pressing_right
+	ld	(hl), #0x01
+;main.c:266: game_state = 2;
+	ld	hl, #_game_state
+	ld	(hl), #0x02
+;main.c:267: fading_black = TRUE;
+	ld	hl, #_fading_black
+	ld	(hl), #0x01
+;main.c:269: }
+	jr	00137$
+00136$:
+;main.c:272: pressing_right = FALSE;
+	ld	hl, #_pressing_right
+	ld	(hl), #0x00
+00137$:
+;main.c:275: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+	ld	a, (#_joy_inp)
+	rlca
+	ret	NC
+	ld	a, (#_prev_joy_inp)
+	rlca
+	ret	C
+;main.c:276: game_state = 1;
+	ld	hl, #_game_state
+	ld	(hl), #0x01
+;main.c:277: set_bkg_tiles(0, 0, 2, 2, BaseBG);
+	ld	de, #_BaseBG
+	push	de
+	ld	hl, #0x202
+	push	hl
+	xor	a, a
+	rrca
+	push	af
+	xor	a, a
+	call	_set_bkg_tiles
+	add	sp, #6
+;main.c:279: break;
+	ret
+;main.c:282: case 1:
+00141$:
+;main.c:283: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+	bit	7, c
+	ret	Z
+	ld	a, (#_prev_joy_inp)
+	rlca
+	ret	C
+;main.c:284: game_state = 0;
+	ld	hl, #_game_state
+	ld	(hl), #0x00
+;main.c:285: set_bkg_tiles(2, 0, 2, 2, BaseBG);
+	ld	de, #_BaseBG
+	push	de
+	ld	hl, #0x202
+	push	hl
+	xor	a, a
+	push	af
+	inc	sp
+	ld	a, #0x02
+	push	af
+	inc	sp
+	call	_set_bkg_tiles
+	add	sp, #6
+;main.c:287: break;
+	ret
+;main.c:290: case 2:
+00145$:
+;main.c:291: fade_to_level(current_level + 1, FALSE);
+	ld	hl, #_current_level
+	ld	c, (hl)
+	inc	c
+	ld	e, #0x00
+	ld	a, c
+	call	_fade_to_level
+;main.c:292: game_state = 0;
+	ld	hl, #_game_state
+	ld	(hl), #0x00
+;main.c:297: }
+;main.c:300: }
+	ret
+;main.c:302: void game(){
 ;	---------------------------------
 ; Function game
 ; ---------------------------------
 _game::
-	add	sp, #-6
-;main.c:168: uint8_t game_state = 0;
-	ldhl	sp,	#0
+	dec	sp
+	dec	sp
+;main.c:303: game_state = 0;
+	ld	hl, #_game_state
 	ld	(hl), #0x00
-;main.c:173: robot.x = 24;
+;main.c:304: previous_game_state = 0;
+	ld	hl, #_previous_game_state
+	ld	(hl), #0x00
+;main.c:305: fading_black = FALSE;
+	ld	hl, #_fading_black
+	ld	(hl), #0x00
+;main.c:307: robot.x = 24;
 	ld	hl, #_robot
 	ld	(hl), #0x18
-;main.c:174: robot.y = 32;
+;main.c:308: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
-;main.c:177: SPRITES_8x16;
+;main.c:310: SPRITES_8x16;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x04
 	ldh	(_LCDC_REG + 0), a
-;main.c:180: set_sprite_data(0, 4 , MainSpriteLabel);
+;main.c:312: set_sprite_data(0, 4 , MainSpriteLabel);
 	ld	de, #_MainSpriteLabel
 	push	de
 	ld	hl, #0x400
@@ -5844,7 +6411,7 @@ _game::
 ;E:/gbdk/include/gb/gb.h:1602: shadow_OAM[nb].tile=tile;
 	ld	hl, #(_shadow_OAM + 2)
 	ld	(hl), #0x01
-;main.c:182: move_sprite(0, robot.x, 64);
+;main.c:314: move_sprite(0, robot.x, 64);
 	ld	hl, #_robot
 	ld	c, (hl)
 ;E:/gbdk/include/gb/gb.h:1675: OAM_item_t * itm = &shadow_OAM[nb];
@@ -5856,7 +6423,7 @@ _game::
 ;E:/gbdk/include/gb/gb.h:1602: shadow_OAM[nb].tile=tile;
 	ld	hl, #(_shadow_OAM + 6)
 	ld	(hl), #0x02
-;main.c:184: move_sprite(1, robot.x + 8, 64);
+;main.c:316: move_sprite(1, robot.x + 8, 64);
 	ld	a, (#_robot + 0)
 	add	a, #0x08
 	ld	c, a
@@ -5866,17 +6433,20 @@ _game::
 	ld	(hl), #0x40
 	inc	hl
 	ld	(hl), c
-;main.c:186: uint8_t joy_inp = joypad();
+;main.c:318: joy_inp = joypad();
 	call	_joypad
-	ldhl	sp,	#1
+	ld	hl, #_joy_inp
 	ld	(hl), a
-;main.c:189: while(1) {
-00154$:
-;main.c:191: if (current_level == 1) {
+;main.c:319: prev_joy_inp = joy_inp;
+	ld	a, (hl)
+	ld	(#_prev_joy_inp),a
+;main.c:321: while(1) {
+00107$:
+;main.c:322: if (current_level == 1) {
 	ld	a, (#_current_level)
 	dec	a
 	jr	NZ, 00104$
-;main.c:192: set_bkg_tiles(0,0, 1,1, BlankTile);
+;main.c:323: set_bkg_tiles(0,0, 1,1, BlankTile);
 	ld	de, #_BlankTile
 	push	de
 	ld	hl, #0x101
@@ -5884,16 +6454,15 @@ _game::
 	xor	a, a
 	rrca
 	push	af
-	xor	a, a
 	call	_set_bkg_tiles
 	add	sp, #6
 	jr	00105$
 00104$:
-;main.c:193: } else if (current_level == 2) {
+;main.c:324: } else if (current_level == 2) {
 	ld	a, (#_current_level)
 	sub	a, #0x02
 	jr	NZ, 00105$
-;main.c:194: set_bkg_tiles(0,0, 1,1, ExitTile);
+;main.c:325: set_bkg_tiles(0,0, 1,1, ExitTile);
 	ld	de, #_ExitTile
 	push	de
 	ld	hl, #0x101
@@ -5901,566 +6470,21 @@ _game::
 	xor	a, a
 	rrca
 	push	af
-	xor	a, a
 	call	_set_bkg_tiles
 	add	sp, #6
 00105$:
-;main.c:197: prev_joy_inp = joy_inp;
-	ldhl	sp,	#1
-	ld	c, (hl)
-;main.c:198: joy_inp = joypad();
+;main.c:327: previous_game_state = game_state;
+	ld	a, (#_game_state)
+	ld	(#_previous_game_state),a
+;main.c:328: prev_joy_inp = joy_inp;
+	ld	a, (#_joy_inp)
+	ld	(#_prev_joy_inp),a
+;main.c:329: joy_inp = joypad();
 	call	_joypad
-	ldhl	sp,	#1
-	ld	(hl), a
-;main.c:302: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
-	ld	a, (hl+)
-	and	a, #0x80
-	ld	(hl+), a
-	xor	a, a
-	ld	(hl+), a
-	ld	a, c
-	and	a, #0x80
-	ld	(hl+), a
-	ld	(hl), #0x00
-;main.c:200: switch (game_state) {
-	ldhl	sp,	#0
-	ld	a, (hl)
-	or	a, a
-	jr	Z, 00106$
-	ldhl	sp,	#0
-	ld	a, (hl)
-	dec	a
-	jp	Z,00146$
-	ldhl	sp,	#0
-	ld	a, (hl)
-	sub	a, #0x02
-	jp	Z,00150$
-	jp	00152$
-;main.c:201: case 0:
-00106$:
-;main.c:202: if (joy_inp & J_UP) {   
-	push	hl
-	ldhl	sp,	#3
-	bit	2, (hl)
-	pop	hl
-	jp	Z,00114$
-;main.c:203: if (!pressing_up) {
-	ld	hl, #_pressing_up
-	ld	a, (hl)
-	or	a, a
-	jp	NZ, 00115$
-;main.c:204: switch (canplayermove(robot.x, robot.y - 16)){
-	ld	a, (#(_robot + 1) + 0)
-	add	a, #0xf0
-	ld	b, a
-	ld	hl, #_robot
-	ld	c, (hl)
-	ld	e, b
-	ld	a, c
-	call	_canplayermove
-	ld	e, a
-;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_frame_counter
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	d, #0x00
-	push	de
-	ld	bc, #0x0007
-	ld	e, l
-;main.c:204: switch (canplayermove(robot.x, robot.y - 16)){
-	call	__modsint
-	pop	de
-	ld	a, e
-	or	a, a
-	jr	Z, 00107$
-	ld	a, e
-	dec	a
-	jr	Z, 00108$
-	ld	a, e
-	sub	a, #0x02
-	jr	Z, 00109$
-	jr	00115$
-;main.c:205: case 0:
-00107$:
-;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x85
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x44
-	push	hl
-	ld	e, #0x41
-	ld	a, #0x79
-	call	_squareone_play
-;main.c:207: pressing_up = TRUE;
-	ld	hl, #_pressing_up
-	ld	(hl), #0x01
-;main.c:208: break;
-	jr	00115$
-;main.c:209: case 1:
-00108$:
-;main.c:210: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x86
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x26
-	push	hl
-	ld	e, #0x80
-	ld	a, #0x08
-	call	_squareone_play
-;main.c:211: robot.y -= 16;
-	ld	a, (#(_robot + 1) + 0)
-	add	a, #0xf0
-	ld	(#(_robot + 1)),a
-;main.c:212: pressing_up = TRUE;
-	ld	hl, #_pressing_up
-	ld	(hl), #0x01
-;main.c:213: break;
-	jr	00115$
-;main.c:214: case 2:
-00109$:
-;main.c:215: noise_play(0x2D,0x67,0x01,0x80);
-	ld	hl, #0x8001
-	push	hl
-	ld	e, #0x67
-	ld	a, #0x2d
-	call	_noise_play
-;main.c:216: robot.y -= 16;
-	ld	a, (#(_robot + 1) + 0)
-	add	a, #0xf0
-	ld	(#(_robot + 1)),a
-;main.c:217: pressing_up = TRUE;
-	ld	hl, #_pressing_up
-	ld	(hl), #0x01
-;main.c:218: game_state = 2;
-	ldhl	sp,	#0
-	ld	(hl), #0x02
-;main.c:221: }
-	jr	00115$
-00114$:
-;main.c:224: pressing_up = FALSE;
-	ld	hl, #_pressing_up
-	ld	(hl), #0x00
-00115$:
-;main.c:227: if (joy_inp & J_DOWN) {     
-	push	hl
-	ldhl	sp,	#3
-	bit	3, (hl)
-	pop	hl
-	jp	Z,00123$
-;main.c:228: if (!pressing_down) {       
-	ld	hl, #_pressing_down
-	ld	a, (hl)
-	or	a, a
-	jp	NZ, 00124$
-;main.c:229: switch (canplayermove(robot.x, robot.y + 16)){
-	ld	a, (#(_robot + 1) + 0)
-	add	a, #0x10
-	ld	b, a
-	ld	hl, #_robot
-	ld	c, (hl)
-	ld	e, b
-	ld	a, c
-	call	_canplayermove
-	ld	e, a
-;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_frame_counter
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	d, #0x00
-	push	de
-	ld	bc, #0x0007
-	ld	e, l
-;main.c:229: switch (canplayermove(robot.x, robot.y + 16)){
-	call	__modsint
-	pop	de
-	ld	a, e
-	or	a, a
-	jr	Z, 00116$
-	ld	a, e
-	dec	a
-	jr	Z, 00117$
-	ld	a, e
-	sub	a, #0x02
-	jr	Z, 00118$
-	jr	00124$
-;main.c:230: case 0:
-00116$:
-;main.c:231: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x85
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x44
-	push	hl
-	ld	e, #0x41
-	ld	a, #0x79
-	call	_squareone_play
-;main.c:232: pressing_down = TRUE;
-	ld	hl, #_pressing_down
-	ld	(hl), #0x01
-;main.c:233: break;
-	jr	00124$
-;main.c:234: case 1:
-00117$:
-;main.c:235: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x86
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x26
-	push	hl
-	ld	e, #0x80
-	ld	a, #0x08
-	call	_squareone_play
-;main.c:236: robot.y += 16;
-	ld	a, (#(_robot + 1) + 0)
-	add	a, #0x10
-	ld	(#(_robot + 1)),a
-;main.c:237: pressing_down = TRUE;
-	ld	hl, #_pressing_down
-	ld	(hl), #0x01
-;main.c:238: break;
-	jr	00124$
-;main.c:239: case 2:
-00118$:
-;main.c:240: noise_play(0x2D,0x67,0x01,0x80);
-	ld	hl, #0x8001
-	push	hl
-	ld	e, #0x67
-	ld	a, #0x2d
-	call	_noise_play
-;main.c:241: robot.y += 16;
-	ld	a, (#(_robot + 1) + 0)
-	add	a, #0x10
-	ld	(#(_robot + 1)),a
-;main.c:242: pressing_down = TRUE;
-	ld	hl, #_pressing_down
-	ld	(hl), #0x01
-;main.c:243: game_state = 2;
-	ldhl	sp,	#0
-	ld	(hl), #0x02
-;main.c:246: }
-	jr	00124$
-00123$:
-;main.c:249: pressing_down = FALSE;
-	ld	hl, #_pressing_down
-	ld	(hl), #0x00
-00124$:
-;main.c:252: if (joy_inp & J_LEFT) {   
-	push	hl
-	ldhl	sp,	#3
-	bit	1, (hl)
-	pop	hl
-	jp	Z,00132$
-;main.c:253: if (!pressing_left) {
-	ld	hl, #_pressing_left
-	ld	a, (hl)
-	or	a, a
-	jp	NZ, 00133$
-;main.c:254: switch (canplayermove(robot.x - 16, robot.y)) {
-	ld	hl, #(_robot + 1)
-	ld	b, (hl)
-	ld	a, (#_robot + 0)
-	add	a, #0xf0
-	ld	e, b
-	call	_canplayermove
-	ld	e, a
-;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_frame_counter
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	d, #0x00
-	push	de
-	ld	bc, #0x0007
-	ld	e, l
-;main.c:254: switch (canplayermove(robot.x - 16, robot.y)) {
-	call	__modsint
-	pop	de
-	ld	a, e
-	or	a, a
-	jr	Z, 00125$
-	ld	a, e
-	dec	a
-	jr	Z, 00126$
-	ld	a, e
-	sub	a, #0x02
-	jr	Z, 00127$
-	jr	00133$
-;main.c:255: case 0:
-00125$:
-;main.c:256: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x85
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x44
-	push	hl
-	ld	e, #0x41
-	ld	a, #0x79
-	call	_squareone_play
-;main.c:257: pressing_left = TRUE;
-	ld	hl, #_pressing_left
-	ld	(hl), #0x01
-;main.c:258: break;
-	jr	00133$
-;main.c:259: case 1:
-00126$:
-;main.c:260: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x86
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x26
-	push	hl
-	ld	e, #0x80
-	ld	a, #0x08
-	call	_squareone_play
-;main.c:261: robot.x -= 16;
-	ld	a, (#_robot + 0)
-	add	a, #0xf0
-	ld	(#_robot),a
-;main.c:262: pressing_left = TRUE;
-	ld	hl, #_pressing_left
-	ld	(hl), #0x01
-;main.c:263: break;
-	jr	00133$
-;main.c:264: case 2:
-00127$:
-;main.c:265: noise_play(0x2D,0x67,0x01,0x80);
-	ld	hl, #0x8001
-	push	hl
-	ld	e, #0x67
-	ld	a, #0x2d
-	call	_noise_play
-;main.c:266: robot.x -= 16;
-	ld	a, (#_robot + 0)
-	add	a, #0xf0
-	ld	(#_robot),a
-;main.c:267: pressing_left = TRUE;
-	ld	hl, #_pressing_left
-	ld	(hl), #0x01
-;main.c:268: game_state = 2;
-	ldhl	sp,	#0
-	ld	(hl), #0x02
-;main.c:271: }
-	jr	00133$
-00132$:
-;main.c:274: pressing_left = FALSE;
-	ld	hl, #_pressing_left
-	ld	(hl), #0x00
-00133$:
-;main.c:277: if (joy_inp & J_RIGHT) {     
-	push	hl
-	ldhl	sp,	#3
-	bit	0, (hl)
-	pop	hl
-	jp	Z,00141$
-;main.c:278: if (!pressing_right) {       
-	ld	a, (#_pressing_right)
-	or	a, a
-	jp	NZ, 00142$
-;main.c:279: switch (canplayermove(robot.x + 16, robot.y)) {
-	ld	hl, #(_robot + 1)
-	ld	b, (hl)
-	ld	a, (#_robot + 0)
-	add	a, #0x10
-	ld	e, b
-	call	_canplayermove
-	ld	e, a
-;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_frame_counter
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	d, #0x00
-	push	de
-	ld	bc, #0x0007
-	ld	e, l
-;main.c:279: switch (canplayermove(robot.x + 16, robot.y)) {
-	call	__modsint
-	pop	de
-	ld	a, e
-	or	a, a
-	jr	Z, 00134$
-	ld	a, e
-	dec	a
-	jr	Z, 00135$
-	ld	a, e
-	sub	a, #0x02
-	jr	Z, 00136$
-	jr	00142$
-;main.c:280: case 0:
-00134$:
-;main.c:281: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x85
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x44
-	push	hl
-	ld	e, #0x41
-	ld	a, #0x79
-	call	_squareone_play
-;main.c:282: pressing_right = TRUE;
-	ld	hl, #_pressing_right
-	ld	(hl), #0x01
-;main.c:283: break;
-	jr	00142$
-;main.c:284: case 1:
-00135$:
-;main.c:285: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
-	ld	hl, #_freq_vals
-	add	hl, bc
-	ld	a, (hl)
-	ld	h, #0x86
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x26
-	push	hl
-	ld	e, #0x80
-	ld	a, #0x08
-	call	_squareone_play
-;main.c:286: robot.x += 16;
-	ld	a, (#_robot + 0)
-	add	a, #0x10
-	ld	(#_robot),a
-;main.c:287: pressing_right = TRUE;
-	ld	hl, #_pressing_right
-	ld	(hl), #0x01
-;main.c:288: break;
-	jr	00142$
-;main.c:289: case 2:
-00136$:
-;main.c:290: noise_play(0x2D,0x67,0x01,0x80);
-	ld	hl, #0x8001
-	push	hl
-	ld	e, #0x67
-	ld	a, #0x2d
-	call	_noise_play
-;main.c:291: robot.x += 16;
-	ld	a, (#_robot + 0)
-	add	a, #0x10
-	ld	(#_robot),a
-;main.c:292: pressing_right = TRUE;
-	ld	hl, #_pressing_right
-	ld	(hl), #0x01
-;main.c:293: game_state = 2;
-	ldhl	sp,	#0
-	ld	(hl), #0x02
-;main.c:296: }
-	jr	00142$
-00141$:
-;main.c:299: pressing_right = FALSE;
-	ld	hl, #_pressing_right
-	ld	(hl), #0x00
-00142$:
-;main.c:302: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
-	ldhl	sp,	#3
-	ld	a, (hl-)
-	or	a, (hl)
-	jr	Z, 00152$
-	ldhl	sp,	#5
-	ld	a, (hl-)
-	or	a, (hl)
-	jr	NZ, 00152$
-;main.c:303: game_state = 1;
-	ldhl	sp,	#0
-	ld	(hl), #0x01
-;main.c:304: set_bkg_tiles(0, 0, 2, 2, BaseBG);
-	ld	de, #_BaseBG
-	push	de
-	ld	hl, #0x202
-	push	hl
-	xor	a, a
-	rrca
-	push	af
-	call	_set_bkg_tiles
-	add	sp, #6
-;main.c:306: break;
-	jr	00152$
-;main.c:309: case 1:
-00146$:
-;main.c:310: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
-	ldhl	sp,	#3
-	ld	a, (hl-)
-	or	a, (hl)
-	jr	Z, 00152$
-	ldhl	sp,	#5
-	ld	a, (hl-)
-	or	a, (hl)
-	jr	NZ, 00152$
-;main.c:311: game_state = 0;
-	ldhl	sp,	#0
-	ld	(hl), #0x00
-;main.c:312: set_bkg_tiles(2, 0, 2, 2, BaseBG);
-	ld	de, #_BaseBG
-	push	de
-	ld	hl, #0x202
-	push	hl
-	ld	hl, #0x02
-	push	hl
-	call	_set_bkg_tiles
-	add	sp, #6
-;main.c:314: break;
-	jr	00152$
-;main.c:317: case 2:
-00150$:
-;main.c:318: fade_to_level(current_level + 1, FALSE);
-	ld	hl, #_current_level
-	ld	c, (hl)
-	inc	c
-	ld	e, #0x00
-	ld	a, c
-	call	_fade_to_level
-;main.c:319: game_state = 0;
-	ldhl	sp,	#0
-	ld	(hl), #0x00
-;main.c:324: }
-00152$:
-;main.c:326: move_sprite(0, robot.x, robot.y);
+	ld	(#_joy_inp),a
+;main.c:331: play_input();
+	call	_play_input
+;main.c:333: move_sprite(0, robot.x, robot.y);
 	ld	hl, #(_robot + 1)
 	ld	c, (hl)
 	ld	hl, #_robot
@@ -6471,61 +6495,66 @@ _game::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:327: move_sprite(1, robot.x + 8, robot.y);
-	ld	hl, #(_robot + 1)
-	ld	c, (hl)
+;main.c:334: move_sprite(1, robot.x + 8, robot.y);
+	ld	a, (#(_robot + 1) + 0)
+	ldhl	sp,	#0
+	ld	(hl), a
 	ld	a, (#_robot + 0)
 	add	a, #0x08
-	ld	b, a
+	ldhl	sp,	#1
 ;E:/gbdk/include/gb/gb.h:1675: OAM_item_t * itm = &shadow_OAM[nb];
-	ld	hl, #(_shadow_OAM + 4)
 ;E:/gbdk/include/gb/gb.h:1676: itm->y=y, itm->x=x;
-	ld	a, c
-	ld	(hl+), a
-	ld	(hl), b
-;main.c:329: frame_counter++;
+	ld	(hl-), a
+	ld	de, #(_shadow_OAM + 4)
+	ld	a, (hl+)
+	ld	(de), a
+	ld	de, #(_shadow_OAM + 5)
+	ld	a, (hl)
+	ld	(de), a
+;main.c:336: frame_counter++;
 	ld	hl, #_frame_counter
 	inc	(hl)
-;main.c:330: wait_vbl_done();
+;main.c:337: wait_vbl_done();
 	call	_wait_vbl_done
-	jp	00154$
-;main.c:332: }
-	add	sp, #6
+	jr	00107$
+;main.c:339: }
+	inc	sp
+	inc	sp
 	ret
-;main.c:334: void main(){
+;main.c:341: void main(){
 ;	---------------------------------
 ; Function main
 ; ---------------------------------
 _main::
-;main.c:338: SHOW_BKG;
+;main.c:342: SHOW_BKG;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x01
 	ldh	(_LCDC_REG + 0), a
-;main.c:339: SHOW_SPRITES;
+;main.c:343: SHOW_SPRITES;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x02
 	ldh	(_LCDC_REG + 0), a
-;main.c:340: DISPLAY_ON;
+;main.c:344: DISPLAY_ON;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x80
 	ldh	(_LCDC_REG + 0), a
-;main.c:341: NR52_REG = 0x80;
+;main.c:345: NR52_REG = 0x80;
 	ld	a, #0x80
 	ldh	(_NR52_REG + 0), a
-;main.c:342: NR50_REG = 0x77;
+;main.c:346: NR50_REG = 0x77;
 	ld	a, #0x77
 	ldh	(_NR50_REG + 0), a
-;main.c:343: NR51_REG = 0xFF;
+;main.c:347: NR51_REG = 0xFF;
 	ld	a, #0xff
 	ldh	(_NR51_REG + 0), a
-;main.c:347: set_bkg_data(0, 146, GBRoboLabel);
+;main.c:349: set_bkg_data(0, 146, GBRoboLabel);
 	ld	de, #_GBRoboLabel
 	push	de
 	ld	hl, #0x9200
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-;main.c:348: set_bkg_tiles(0, 0, 20, 18, GBRoboMapLabel);
+;main.c:350: set_bkg_tiles(0, 0, 20, 18, GBRoboMapLabel);
 	ld	de, #_GBRoboMapLabel
 	push	de
 	ld	hl, #0x1214
@@ -6536,20 +6565,23 @@ _main::
 	xor	a, a
 	call	_set_bkg_tiles
 	add	sp, #6
-;main.c:350: while(1) {
+;main.c:352: while(1) {
 00104$:
-;main.c:351: menu_joy_inp = joypad();
+;main.c:353: joy_inp = joypad();
 	call	_joypad
-;main.c:353: if (menu_joy_inp & J_START) {
+	ld	hl, #_joy_inp
+	ld	(hl), a
+;main.c:355: if (joy_inp & J_START) {
+	ld	a, (hl)
 	rlca
 	jr	NC, 00104$
-;main.c:354: fade_to_level(1, TRUE);
+;main.c:356: fade_to_level(1, TRUE);
 	ld	a,#0x01
 	ld	e,a
 	call	_fade_to_level
-;main.c:355: game();
+;main.c:357: game();
 	call	_game
-;main.c:360: }
+;main.c:362: }
 	jr	00104$
 	.area _CODE
 	.area _INITIALIZER
@@ -7256,8 +7288,18 @@ __xinit__pressing_left:
 	.db #0x00	;  0
 __xinit__pressing_right:
 	.db #0x00	;  0
+__xinit__joy_inp:
+	.db #0x00	; 0
+__xinit__prev_joy_inp:
+	.db #0x00	; 0
+__xinit__game_state:
+	.db #0x00	; 0
+__xinit__previous_game_state:
+	.db #0x00	; 0
 __xinit__frame_counter:
 	.db #0x00	; 0
+__xinit__fading_black:
+	.db #0x00	;  0
 __xinit__GameMapWidth:
 	.db #0x14	; 20
 __xinit__GameMapHeight:
