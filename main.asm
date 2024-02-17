@@ -24,7 +24,6 @@
 	.globl _current_level
 	.globl _GameMapHeight
 	.globl _GameMapWidth
-	.globl _GameMap
 	.globl _frame_counter
 	.globl _pressing_right
 	.globl _pressing_left
@@ -33,11 +32,12 @@
 	.globl _paused
 	.globl _BlankTile
 	.globl _ExitTile
-	.globl _MainSpriteLabel
 	.globl _GameTiles
 	.globl _GameTilesIndex
 	.globl _robot
+	.globl _GameMap
 	.globl _freq_vals
+	.globl _MapblahLabel
 	.globl _Map3Label
 	.globl _Map2Label
 	.globl _Map1Label
@@ -45,6 +45,7 @@
 	.globl _HudMapLabel
 	.globl _GBRoboMapLabel
 	.globl _HudTilesLabel
+	.globl _MainSpriteLabel
 	.globl _GBRoboLabel
 ;--------------------------------------------------------
 ; special function registers
@@ -53,6 +54,8 @@
 ; ram data
 ;--------------------------------------------------------
 	.area _DATA
+_GameMap::
+	.ds 320
 _robot::
 	.ds 2
 ;--------------------------------------------------------
@@ -63,8 +66,6 @@ _GameTilesIndex::
 	.ds 41
 _GameTiles::
 	.ds 640
-_MainSpriteLabel::
-	.ds 576
 _ExitTile::
 	.ds 4
 _BlankTile::
@@ -81,8 +82,6 @@ _pressing_right::
 	.ds 1
 _frame_counter::
 	.ds 1
-_GameMap::
-	.ds 320
 _GameMapWidth::
 	.ds 1
 _GameMapHeight::
@@ -109,7 +108,7 @@ _current_level::
 ; code
 ;--------------------------------------------------------
 	.area _CODE
-;main.c:86: void squareone_play(uint8_t reg0, uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
+;main.c:59: void squareone_play(uint8_t reg0, uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
 ;	---------------------------------
 ; Function squareone_play
 ; ---------------------------------
@@ -117,17 +116,17 @@ _squareone_play::
 	ldh	(_NR10_REG + 0), a
 	ld	a, e
 	ldh	(_NR11_REG + 0), a
-;main.c:89: NR12_REG = reg2;
+;main.c:62: NR12_REG = reg2;
 	ldhl	sp,	#2
-;main.c:90: NR13_REG = reg3;
+;main.c:63: NR13_REG = reg3;
 	ld	a, (hl+)
 	ldh	(_NR12_REG + 0), a
-;main.c:91: NR14_REG = reg4;
+;main.c:64: NR14_REG = reg4;
 	ld	a, (hl+)
 	ldh	(_NR13_REG + 0), a
 	ld	a, (hl)
 	ldh	(_NR14_REG + 0), a
-;main.c:92: }
+;main.c:65: }
 	pop	hl
 	add	sp, #3
 	jp	(hl)
@@ -2484,6 +2483,647 @@ _GBRoboLabel:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
+_MainSpriteLabel:
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x01	; 1
+	.db #0x01	; 1
+	.db #0x02	; 2
+	.db #0x03	; 3
+	.db #0x02	; 2
+	.db #0x03	; 3
+	.db #0x01	; 1
+	.db #0x01	; 1
+	.db #0x3f	; 63
+	.db #0x3f	; 63
+	.db #0x5f	; 95
+	.db #0x60	; 96
+	.db #0x7f	; 127
+	.db #0x4c	; 76	'L'
+	.db #0x7b	; 123
+	.db #0x56	; 86	'V'
+	.db #0x77	; 119	'w'
+	.db #0x5a	; 90	'Z'
+	.db #0x7f	; 127
+	.db #0x4c	; 76	'L'
+	.db #0x7f	; 127
+	.db #0x40	; 64
+	.db #0x7f	; 127
+	.db #0x43	; 67	'C'
+	.db #0x4f	; 79	'O'
+	.db #0x70	; 112	'p'
+	.db #0x3f	; 63
+	.db #0x3f	; 63
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x80	; 128
+	.db #0x80	; 128
+	.db #0xc0	; 192
+	.db #0x40	; 64
+	.db #0x40	; 64
+	.db #0xc0	; 192
+	.db #0x80	; 128
+	.db #0x80	; 128
+	.db #0xfc	; 252
+	.db #0xfc	; 252
+	.db #0xfa	; 250
+	.db #0x06	; 6
+	.db #0xfe	; 254
+	.db #0x32	; 50	'2'
+	.db #0xee	; 238
+	.db #0x5a	; 90	'Z'
+	.db #0xde	; 222
+	.db #0x6a	; 106	'j'
+	.db #0xfe	; 254
+	.db #0x32	; 50	'2'
+	.db #0xfe	; 254
+	.db #0x02	; 2
+	.db #0xfe	; 254
+	.db #0xc2	; 194
+	.db #0xf2	; 242
+	.db #0x0e	; 14
+	.db #0xfc	; 252
+	.db #0xfc	; 252
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x0f	; 15
+	.db #0x0f	; 15
+	.db #0x1c	; 28
+	.db #0x13	; 19
+	.db #0x0f	; 15
+	.db #0x0c	; 12
+	.db #0x04	; 4
+	.db #0x07	; 7
+	.db #0x0b	; 11
+	.db #0x0d	; 13
+	.db #0x17	; 23
+	.db #0x1b	; 27
+	.db #0x1f	; 31
+	.db #0x15	; 21
+	.db #0x2f	; 47
+	.db #0x33	; 51	'3'
+	.db #0x3f	; 63
+	.db #0x21	; 33
+	.db #0x3f	; 63
+	.db #0x27	; 39
+	.db #0x2f	; 47
+	.db #0x31	; 49	'1'
+	.db #0x10	; 16
+	.db #0x1f	; 31
+	.db #0x0f	; 15
+	.db #0x0f	; 15
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0xf0	; 240
+	.db #0xf0	; 240
+	.db #0x38	; 56	'8'
+	.db #0xc8	; 200
+	.db #0xf0	; 240
+	.db #0x30	; 48	'0'
+	.db #0x20	; 32
+	.db #0xe0	; 224
+	.db #0xd0	; 208
+	.db #0x30	; 48	'0'
+	.db #0xe8	; 232
+	.db #0xd8	; 216
+	.db #0xf8	; 248
+	.db #0x08	; 8
+	.db #0xf4	; 244
+	.db #0x8c	; 140
+	.db #0xfc	; 252
+	.db #0x44	; 68	'D'
+	.db #0xfc	; 252
+	.db #0x84	; 132
+	.db #0xf4	; 244
+	.db #0x0c	; 12
+	.db #0x08	; 8
+	.db #0xf8	; 248
+	.db #0xf0	; 240
+	.db #0xf0	; 240
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x07	; 7
+	.db #0x07	; 7
+	.db #0x78	; 120	'x'
+	.db #0x7f	; 127
+	.db #0x5c	; 92
+	.db #0x57	; 87	'W'
+	.db #0x5f	; 95
+	.db #0x53	; 83	'S'
+	.db #0x5f	; 95
+	.db #0x50	; 80	'P'
+	.db #0x5f	; 95
+	.db #0x50	; 80	'P'
+	.db #0x5f	; 95
+	.db #0x50	; 80	'P'
+	.db #0x3f	; 63
+	.db #0x30	; 48	'0'
+	.db #0x0f	; 15
+	.db #0x08	; 8
+	.db #0x0b	; 11
+	.db #0x0c	; 12
+	.db #0x07	; 7
+	.db #0x06	; 6
+	.db #0x01	; 1
+	.db #0x01	; 1
+	.db #0x03	; 3
+	.db #0x02	; 2
+	.db #0x07	; 7
+	.db #0x07	; 7
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0xe0	; 224
+	.db #0xe0	; 224
+	.db #0x1e	; 30
+	.db #0xfe	; 254
+	.db #0x2a	; 42
+	.db #0xfa	; 250
+	.db #0xca	; 202
+	.db #0xfa	; 250
+	.db #0xca	; 202
+	.db #0x3a	; 58
+	.db #0xca	; 202
+	.db #0x3a	; 58
+	.db #0x8a	; 138
+	.db #0x7a	; 122	'z'
+	.db #0x8c	; 140
+	.db #0x7c	; 124
+	.db #0x90	; 144
+	.db #0x70	; 112	'p'
+	.db #0x10	; 16
+	.db #0xf0	; 240
+	.db #0x60	; 96
+	.db #0xe0	; 224
+	.db #0x80	; 128
+	.db #0x80	; 128
+	.db #0x40	; 64
+	.db #0xc0	; 192
+	.db #0xe0	; 224
+	.db #0xe0	; 224
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x07	; 7
+	.db #0x07	; 7
+	.db #0x1f	; 31
+	.db #0x18	; 24
+	.db #0x3f	; 63
+	.db #0x20	; 32
+	.db #0x3f	; 63
+	.db #0x20	; 32
+	.db #0x3f	; 63
+	.db #0x38	; 56	'8'
+	.db #0x3f	; 63
+	.db #0x27	; 39
+	.db #0x3f	; 63
+	.db #0x20	; 32
+	.db #0x2f	; 47
+	.db #0x30	; 48	'0'
+	.db #0x1b	; 27
+	.db #0x1c	; 28
+	.db #0x07	; 7
+	.db #0x07	; 7
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0xe0	; 224
+	.db #0xe0	; 224
+	.db #0xf8	; 248
+	.db #0x18	; 24
+	.db #0xe4	; 228
+	.db #0x1c	; 28
+	.db #0xe4	; 228
+	.db #0x1c	; 28
+	.db #0xdc	; 220
+	.db #0x3c	; 60
+	.db #0xe4	; 228
+	.db #0xfc	; 252
+	.db #0xc4	; 196
+	.db #0x3c	; 60
+	.db #0x84	; 132
+	.db #0x7c	; 124
+	.db #0x98	; 152
+	.db #0x78	; 120	'x'
+	.db #0xe0	; 224
+	.db #0xe0	; 224
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x07	; 7
+	.db #0x07	; 7
+	.db #0x1f	; 31
+	.db #0x18	; 24
+	.db #0x3f	; 63
+	.db #0x20	; 32
+	.db #0x3f	; 63
+	.db #0x20	; 32
+	.db #0x1f	; 31
+	.db #0x18	; 24
+	.db #0x07	; 7
+	.db #0x07	; 7
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0xe0	; 224
+	.db #0xe0	; 224
+	.db #0xf8	; 248
+	.db #0x18	; 24
+	.db #0xfc	; 252
+	.db #0x04	; 4
+	.db #0xfc	; 252
+	.db #0x04	; 4
+	.db #0xf8	; 248
+	.db #0x18	; 24
+	.db #0xe0	; 224
+	.db #0xe0	; 224
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x3f	; 63
+	.db #0x3f	; 63
+	.db #0x40	; 64
+	.db #0x7f	; 127
+	.db #0x42	; 66	'B'
+	.db #0x7d	; 125
+	.db #0x44	; 68	'D'
+	.db #0x7b	; 123
+	.db #0x4e	; 78	'N'
+	.db #0x71	; 113	'q'
+	.db #0x44	; 68	'D'
+	.db #0x7b	; 123
+	.db #0x48	; 72	'H'
+	.db #0x77	; 119	'w'
+	.db #0x40	; 64
+	.db #0x7f	; 127
+	.db #0x3f	; 63
+	.db #0x3f	; 63
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0xf8	; 248
+	.db #0xf8	; 248
+	.db #0x7c	; 124
+	.db #0x84	; 132
+	.db #0x7e	; 126
+	.db #0x86	; 134
+	.db #0x7c	; 124
+	.db #0x84	; 132
+	.db #0x7c	; 124
+	.db #0x84	; 132
+	.db #0x7c	; 124
+	.db #0x84	; 132
+	.db #0x7e	; 126
+	.db #0x86	; 134
+	.db #0x7c	; 124
+	.db #0x84	; 132
+	.db #0xf8	; 248
+	.db #0xf8	; 248
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x1f	; 31
+	.db #0x1f	; 31
+	.db #0x20	; 32
+	.db #0x20	; 32
+	.db #0x40	; 64
+	.db #0x40	; 64
+	.db #0x20	; 32
+	.db #0x20	; 32
+	.db #0x10	; 16
+	.db #0x10	; 16
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x04	; 4
+	.db #0x04	; 4
+	.db #0x03	; 3
+	.db #0x03	; 3
+	.db #0x03	; 3
+	.db #0x03	; 3
+	.db #0x04	; 4
+	.db #0x04	; 4
+	.db #0x18	; 24
+	.db #0x08	; 8
+	.db #0x78	; 120	'x'
+	.db #0x10	; 16
+	.db #0x30	; 48	'0'
+	.db #0x20	; 32
+	.db #0x10	; 16
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x8e	; 142
+	.db #0x8e	; 142
+	.db #0x46	; 70	'F'
+	.db #0x66	; 102	'f'
+	.db #0x0a	; 10
+	.db #0x1a	; 26
+	.db #0x10	; 16
+	.db #0x18	; 24
+	.db #0x20	; 32
+	.db #0x24	; 36
+	.db #0x44	; 68	'D'
+	.db #0x44	; 68	'D'
+	.db #0x82	; 130
+	.db #0x82	; 130
+	.db #0x02	; 2
+	.db #0x02	; 2
+	.db #0x02	; 2
+	.db #0x02	; 2
+	.db #0x82	; 130
+	.db #0x82	; 130
+	.db #0x42	; 66	'B'
+	.db #0x42	; 66	'B'
+	.db #0x22	; 34
+	.db #0x22	; 34
+	.db #0x14	; 20
+	.db #0x14	; 20
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x07	; 7
+	.db #0x07	; 7
+	.db #0x0f	; 15
+	.db #0x08	; 8
+	.db #0x1f	; 31
+	.db #0x11	; 17
+	.db #0x1e	; 30
+	.db #0x12	; 18
+	.db #0x1f	; 31
+	.db #0x11	; 17
+	.db #0x17	; 23
+	.db #0x18	; 24
+	.db #0x0b	; 11
+	.db #0x0c	; 12
+	.db #0x07	; 7
+	.db #0x06	; 6
+	.db #0x03	; 3
+	.db #0x02	; 2
+	.db #0x01	; 1
+	.db #0x01	; 1
+	.db #0x03	; 3
+	.db #0x02	; 2
+	.db #0x03	; 3
+	.db #0x02	; 2
+	.db #0x01	; 1
+	.db #0x01	; 1
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0xe0	; 224
+	.db #0xe0	; 224
+	.db #0xf0	; 240
+	.db #0x10	; 16
+	.db #0xe8	; 232
+	.db #0x98	; 152
+	.db #0x68	; 104	'h'
+	.db #0x58	; 88	'X'
+	.db #0xe8	; 232
+	.db #0x98	; 152
+	.db #0xe8	; 232
+	.db #0x18	; 24
+	.db #0xd0	; 208
+	.db #0x30	; 48	'0'
+	.db #0x60	; 96
+	.db #0xe0	; 224
+	.db #0x40	; 64
+	.db #0xc0	; 192
+	.db #0x40	; 64
+	.db #0xc0	; 192
+	.db #0x40	; 64
+	.db #0xc0	; 192
+	.db #0x40	; 64
+	.db #0xc0	; 192
+	.db #0x40	; 64
+	.db #0xc0	; 192
+	.db #0x80	; 128
+	.db #0x80	; 128
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x7f	; 127
+	.db #0x7f	; 127
+	.db #0x40	; 64
+	.db #0x7f	; 127
+	.db #0x47	; 71	'G'
+	.db #0x7c	; 124
+	.db #0x44	; 68	'D'
+	.db #0x78	; 120	'x'
+	.db #0x48	; 72	'H'
+	.db #0x78	; 120	'x'
+	.db #0x48	; 72	'H'
+	.db #0x70	; 112	'p'
+	.db #0x50	; 80	'P'
+	.db #0x7e	; 126
+	.db #0x5e	; 94
+	.db #0x7e	; 126
+	.db #0x42	; 66	'B'
+	.db #0x7c	; 124
+	.db #0x44	; 68	'D'
+	.db #0x7c	; 124
+	.db #0x44	; 68	'D'
+	.db #0x78	; 120	'x'
+	.db #0x48	; 72	'H'
+	.db #0x79	; 121	'y'
+	.db #0x49	; 73	'I'
+	.db #0x7f	; 127
+	.db #0x4e	; 78	'N'
+	.db #0x7f	; 127
+	.db #0x40	; 64
+	.db #0x7f	; 127
+	.db #0x7f	; 127
+	.db #0xfe	; 254
+	.db #0xfe	; 254
+	.db #0xfe	; 254
+	.db #0x02	; 2
+	.db #0xfe	; 254
+	.db #0xfa	; 250
+	.db #0x0e	; 14
+	.db #0x0a	; 10
+	.db #0x1e	; 30
+	.db #0x12	; 18
+	.db #0x3e	; 62
+	.db #0x22	; 34
+	.db #0x7e	; 126
+	.db #0x42	; 66	'B'
+	.db #0x7e	; 126
+	.db #0x72	; 114	'r'
+	.db #0x1e	; 30
+	.db #0x12	; 18
+	.db #0x3e	; 62
+	.db #0x22	; 34
+	.db #0x7e	; 126
+	.db #0x42	; 66	'B'
+	.db #0xfe	; 254
+	.db #0x82	; 130
+	.db #0xfe	; 254
+	.db #0x02	; 2
+	.db #0xfe	; 254
+	.db #0x02	; 2
+	.db #0xfe	; 254
+	.db #0x02	; 2
+	.db #0xfe	; 254
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0x7f	; 127
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
+	.db #0x00	; 0
+	.db #0xfe	; 254
 _HudTilesLabel:
 	.db #0x00	; 0
 	.db #0x00	; 0
@@ -4355,6 +4995,327 @@ _Map3Label:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
+_MapblahLabel:
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x04	; 4
+	.db #0x06	; 6
+	.db #0x04	; 4
+	.db #0x06	; 6
+	.db #0x04	; 4
+	.db #0x06	; 6
+	.db #0x04	; 4
+	.db #0x06	; 6
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x05	; 5
+	.db #0x07	; 7
+	.db #0x05	; 5
+	.db #0x07	; 7
+	.db #0x05	; 5
+	.db #0x07	; 7
+	.db #0x05	; 5
+	.db #0x07	; 7
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
+	.db #0x00	; 0
 _freq_vals:
 	.db #0x21	; 33
 	.db #0x41	; 65	'A'
@@ -4363,7 +5324,7 @@ _freq_vals:
 	.db #0xa1	; 161
 	.db #0xc1	; 193
 	.db #0xf1	; 241
-;main.c:94: void noise_play(uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
+;main.c:67: void noise_play(uint8_t reg1, uint8_t reg2, uint8_t reg3, uint8_t reg4){
 ;	---------------------------------
 ; Function noise_play
 ; ---------------------------------
@@ -4371,18 +5332,18 @@ _noise_play::
 	ldh	(_NR41_REG + 0), a
 	ld	a, e
 	ldh	(_NR42_REG + 0), a
-;main.c:97: NR43_REG = reg3;
+;main.c:70: NR43_REG = reg3;
 	ldhl	sp,	#2
-;main.c:98: NR44_REG = reg4;
+;main.c:71: NR44_REG = reg4;
 	ld	a, (hl+)
 	ldh	(_NR43_REG + 0), a
 	ld	a, (hl)
 	ldh	(_NR44_REG + 0), a
-;main.c:99: }
+;main.c:72: }
 	pop	hl
 	pop	af
 	jp	(hl)
-;main.c:101: uint8_t canplayermove(uint8_t playerX, uint8_t playerY){ 
+;main.c:74: uint8_t canplayermove(uint8_t playerX, uint8_t playerY){ 
 ;	---------------------------------
 ; Function canplayermove
 ; ---------------------------------
@@ -4391,7 +5352,7 @@ _canplayermove::
 	ld	c, a
 	ldhl	sp,	#5
 	ld	(hl), e
-;main.c:105: indexTLx = (playerX - 8) / 8;
+;main.c:78: indexTLx = (playerX - 8) / 8;
 	ldhl	sp,	#1
 	ld	a, c
 	ld	(hl+), a
@@ -4433,7 +5394,7 @@ _canplayermove::
 	rr	c
 	ldhl	sp,	#0
 	ld	(hl), c
-;main.c:106: indexTLy = (playerY - 16) / 8;
+;main.c:79: indexTLy = (playerY - 16) / 8;
 	ldhl	sp,	#5
 	ld	a, (hl)
 	ldhl	sp,	#1
@@ -4474,7 +5435,7 @@ _canplayermove::
 	rr	c
 	sra	b
 	rr	c
-;main.c:107: tileindexTL = 20 * indexTLy + indexTLx;
+;main.c:80: tileindexTL = 20 * indexTLy + indexTLx;
 	ld	b, #0x00
 	ld	l, c
 	ld	h, b
@@ -4493,7 +5454,7 @@ _canplayermove::
 	ld	a, e
 	adc	a, b
 	ld	b, a
-;main.c:109: if ((GameMap[tileindexTL] >= 0x04 && GameMap[tileindexTL] <= 0x07) || (GameMap[tileindexTL] >= 0x20 && GameMap[tileindexTL] <= 0x23)) {
+;main.c:82: if ((GameMap[tileindexTL] >= 0x04 && GameMap[tileindexTL] <= 0x07) || (GameMap[tileindexTL] >= 0x20 && GameMap[tileindexTL] <= 0x23)) {
 	ld	hl, #_GameMap
 	add	hl, bc
 	ld	c, (hl)
@@ -4511,29 +5472,29 @@ _canplayermove::
 	sub	a, c
 	jr	C, 00106$
 00105$:
-;main.c:110: result = 1;
+;main.c:83: result = 1;
 	ld	a, #0x01
 	jr	00107$
 00106$:
-;main.c:112: } else if ((GameMap[tileindexTL] >= 0x14 && GameMap[tileindexTL] <= 0x17)){
+;main.c:85: } else if ((GameMap[tileindexTL] >= 0x14 && GameMap[tileindexTL] <= 0x17)){
 	ld	a, c
 	sub	a, #0x14
 	jr	C, 00102$
 	ld	a, #0x17
 	sub	a, c
 	jr	C, 00102$
-;main.c:113: result = 2;
+;main.c:86: result = 2;
 	ld	a, #0x02
 	jr	00107$
 00102$:
-;main.c:116: result = 0;
+;main.c:89: result = 0;
 	xor	a, a
 00107$:
-;main.c:119: return result;
-;main.c:120: }
+;main.c:92: return result;
+;main.c:93: }
 	add	sp, #6
 	ret
-;main.c:122: void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_height){
+;main.c:95: void update_level_map(unsigned char new_BG[], uint8_t new_width, uint8_t new_height){
 ;	---------------------------------
 ; Function update_level_map
 ; ---------------------------------
@@ -4546,10 +5507,10 @@ _update_level_map::
 	dec	hl
 	dec	hl
 	ld	(hl), a
-;main.c:124: for (i=0; i<320; ++i) 
+;main.c:97: for (i=0; i<320; ++i) 
 	ld	bc, #0x0000
 00102$:
-;main.c:126: GameMap[i] = new_BG[i];
+;main.c:99: GameMap[i] = new_BG[i];
 	ld	hl, #_GameMap
 	add	hl, bc
 	inc	sp
@@ -4566,7 +5527,7 @@ _update_level_map::
 	pop	hl
 	push	hl
 	ld	(hl), a
-;main.c:124: for (i=0; i<320; ++i) 
+;main.c:97: for (i=0; i<320; ++i) 
 	inc	bc
 	ld	e, c
 	ld	d, b
@@ -4575,16 +5536,17 @@ _update_level_map::
 	ld	a, d
 	sbc	a, #0x01
 	jr	C, 00102$
-;main.c:129: GameMapWidth = new_width;
+;main.c:102: GameMapWidth = new_width;
 	ldhl	sp,	#2
 	ld	a, (hl)
 	ld	(#_GameMapWidth),a
-;main.c:130: GameMapHeight = new_height;
+;main.c:103: GameMapHeight = new_height - 2;
 	ldhl	sp,	#7
 	ld	a, (hl)
+	add	a, #0xfe
 	ld	hl, #_GameMapHeight
 	ld	(hl), a
-;main.c:131: set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
+;main.c:104: set_bkg_tiles(0, 0, GameMapWidth, GameMapHeight, GameMap);
 	ld	de, #_GameMap
 	push	de
 	ld	a, (hl)
@@ -4599,84 +5561,105 @@ _update_level_map::
 	xor	a, a
 	call	_set_bkg_tiles
 	add	sp, #6
-;main.c:132: }
+;main.c:105: }
 	add	sp, #5
 	pop	hl
 	inc	sp
 	jp	(hl)
-;main.c:134: void goto_level(uint8_t level) {
+;main.c:107: void goto_level(uint8_t level) {
 ;	---------------------------------
 ; Function goto_level
 ; ---------------------------------
 _goto_level::
-;main.c:135: if (level == 1) {
+;main.c:108: if (level == 1) {
 	ld	c, a
 	dec	a
-	jr	NZ, 00107$
-;main.c:136: update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight - 2);
+	jr	NZ, 00110$
+;main.c:109: update_level_map(Map1Label, Map1LabelWidth, Map1LabelHeight);
 	ld	de, #_Map1Label+0
 	push	bc
-	ld	a, #0x0e
+	ld	a, #0x10
 	push	af
 	inc	sp
 	ld	a, #0x14
 	call	_update_level_map
 	pop	bc
-;main.c:137: robot.x = 24;
+;main.c:110: robot.x = 24;
 	ld	hl, #_robot
 	ld	(hl), #0x18
-;main.c:138: robot.y = 32;
+;main.c:111: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
-	jr	00108$
-00107$:
-;main.c:139: } else if (level == 2) {
+	jr	00111$
+00110$:
+;main.c:112: } else if (level == 2) {
 	ld	a, c
 	sub	a, #0x02
-	jr	NZ, 00104$
-;main.c:140: update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight - 2);
+	jr	NZ, 00107$
+;main.c:113: update_level_map(Map2Label, Map2LabelWidth, Map2LabelHeight);
 	push	bc
-	ld	a, #0x0e
+	ld	a, #0x10
 	push	af
 	inc	sp
 	ld	a, #0x14
 	ld	de, #_Map2Label
 	call	_update_level_map
 	pop	bc
-;main.c:141: robot.x = 88;
+;main.c:114: robot.x = 88;
 	ld	hl, #_robot
 	ld	(hl), #0x58
-;main.c:142: robot.y = 32;
+;main.c:115: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
-	jr	00108$
-00104$:
-;main.c:143: } else if (level == 3) {
+	jr	00111$
+00107$:
+;main.c:116: } else if (level == 3) {
 	ld	a, c
 	sub	a, #0x03
-	jr	NZ, 00108$
-;main.c:144: update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight - 2);
+	jr	NZ, 00104$
+;main.c:117: update_level_map(Map3Label, Map3LabelWidth, Map3LabelHeight);
 	push	bc
-	ld	a, #0x0e
+	ld	a, #0x10
 	push	af
 	inc	sp
 	ld	a, #0x14
 	ld	de, #_Map3Label
 	call	_update_level_map
 	pop	bc
-;main.c:145: robot.x = 24;
+;main.c:118: robot.x = 24;
 	ld	hl, #_robot
 	ld	(hl), #0x18
-;main.c:146: robot.y = 32;
+;main.c:119: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
-00108$:
-;main.c:148: current_level = level;
+	jr	00111$
+00104$:
+;main.c:120: } else if (level == 4) {
+	ld	a, c
+	sub	a, #0x04
+	jr	NZ, 00111$
+;main.c:121: update_level_map(MapblahLabel, Map3LabelWidth, Map3LabelHeight);
+	push	bc
+	ld	a, #0x10
+	push	af
+	inc	sp
+	ld	a, #0x14
+	ld	de, #_MapblahLabel
+	call	_update_level_map
+	pop	bc
+;main.c:122: robot.x = 24;
+	ld	hl, #_robot
+	ld	(hl), #0x18
+;main.c:123: robot.y = 32;
+	ld	hl, #(_robot + 1)
+	ld	(hl), #0x20
+00111$:
+;main.c:125: current_level = level;
 	ld	hl, #_current_level
 	ld	(hl), c
-;main.c:149: }
+;main.c:126: }
 	ret
-;main.c:151: void fade_to_level(uint8_t selected_level, BOOLEAN title) {
+;main.c:128: void fade_to_level(uint8_t selected_level, BOOLEAN title) {
 ;	---------------------------------
 ; Function fade_to_level
 ; ---------------------------------
@@ -4684,95 +5667,62 @@ _fade_to_level::
 	add	sp, #-4
 	ldhl	sp,	#1
 	ld	(hl-), a
-;main.c:155: while(1) {
+;main.c:132: while(1) {
 	ld	a, e
 	ld	(hl+), a
 	inc	hl
 	xor	a, a
 	ld	(hl+), a
 	ld	(hl), a
-00129$:
-;main.c:156: fade_counter++;
+00114$:
+;main.c:133: fade_counter++;
 	ldhl	sp,	#3
 	inc	(hl)
-;main.c:157: if (!(fade_counter % 4)) {
+;main.c:134: if (!(fade_counter % 4)) {
 	ld	a, (hl)
 	and	a, #0x03
-	jr	NZ, 00102$
-;main.c:158: fade_phase++;
+	jp	NZ,00112$
+;main.c:135: fade_phase++;
 	ldhl	sp,	#2
 	inc	(hl)
-00102$:
-;main.c:160: if (fade_phase == 0) {
-	ldhl	sp,	#2
-	ld	a, (hl)
-	or	a, a
-	jr	NZ, 00126$
-;main.c:161: BGP_REG = 0xE4; //11100100
-	ld	a, #0xe4
-	ldh	(_BGP_REG + 0), a
-;main.c:162: OBP0_REG = 0xE4;
-	ld	a, #0xe4
-	ldh	(_OBP0_REG + 0), a
-	jp	00127$
-00126$:
-;main.c:163: } else if (fade_phase == 1) {
-	ldhl	sp,	#2
-	ld	a, (hl)
-	dec	a
-	jr	NZ, 00123$
-;main.c:164: BGP_REG = 0xF9; //11111001
-	ld	a, #0xf9
-	ldh	(_BGP_REG + 0), a
-;main.c:165: OBP0_REG = 0xF9;
-	ld	a, #0xf9
-	ldh	(_OBP0_REG + 0), a
-	jp	00127$
-00123$:
-;main.c:166: } else if (fade_phase == 2) {
-	ldhl	sp,	#2
-	ld	a, (hl)
-	sub	a, #0x02
-	jr	NZ, 00120$
-;main.c:167: BGP_REG = 0xFE; //11111001
-	ld	a, #0xfe
-	ldh	(_BGP_REG + 0), a
-;main.c:168: OBP0_REG = 0xFE;
-	ld	a, #0xfe
-	ldh	(_OBP0_REG + 0), a
-	jp	00127$
-00120$:
-;main.c:169: } else if (fade_phase == 3) {
-	ldhl	sp,	#2
+;main.c:136: if (fade_phase == 3) {
 	ld	a, (hl)
 	sub	a, #0x03
-	jr	NZ, 00117$
-;main.c:170: BGP_REG = 0xFF; //...
-	ld	a, #0xff
+	jr	NZ, 00104$
+;main.c:137: BGP_REG = (BGP_REG >> 2) | 0b11000000; //11111001
+	ldh	a, (_BGP_REG + 0)
+	rrca
+	rrca
+	and	a, #0x3f
+	or	a, #0xc0
 	ldh	(_BGP_REG + 0), a
-;main.c:171: OBP0_REG = 0xFF;
-	ld	a, #0xff
+;main.c:138: OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
+	ldh	a, (_OBP0_REG + 0)
+	rrca
+	rrca
+	and	a, #0x3f
+	or	a, #0xc0
 	ldh	(_OBP0_REG + 0), a
-;main.c:172: if (title) {
+;main.c:139: if (title) {
 	ldhl	sp,	#0
 	ld	a, (hl)
 	or	a, a
-	jr	Z, 00104$
-;main.c:173: set_bkg_data(0, 40, GameTiles);
+	jr	Z, 00102$
+;main.c:140: set_bkg_data(0, 40, GameTiles);
 	ld	de, #_GameTiles
 	push	de
 	ld	hl, #0x2800
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-;main.c:174: set_bkg_data(41, 9, HudTilesLabel);
+;main.c:141: set_bkg_data(41, 9, HudTilesLabel);
 	ld	de, #_HudTilesLabel
 	push	de
 	ld	hl, #0x929
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-;main.c:175: set_bkg_tiles(0, 14, HudMapLabelWidth, HudMapLabelHeight, HudMapLabel);
+;main.c:142: set_bkg_tiles(0, 14, HudMapLabelWidth, HudMapLabelHeight, HudMapLabel);
 	ld	de, #_HudMapLabel
 	push	de
 	ld	hl, #0x414
@@ -4781,12 +5731,12 @@ _fade_to_level::
 	push	hl
 	call	_set_bkg_tiles
 	add	sp, #6
-00104$:
-;main.c:177: goto_level(selected_level);
+00102$:
+;main.c:144: goto_level(selected_level);
 	ldhl	sp,	#1
 	ld	a, (hl)
 	call	_goto_level
-;main.c:178: move_sprite(0, robot.x, robot.y);
+;main.c:145: move_sprite(0, robot.x, robot.y);
 	ld	hl, #(_robot + 1)
 	ld	c, (hl)
 	ld	hl, #_robot
@@ -4797,7 +5747,7 @@ _fade_to_level::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:179: move_sprite(1, robot.x + 8, robot.y);
+;main.c:146: move_sprite(1, robot.x + 8, robot.y);
 	ld	hl, #(_robot + 1)
 	ld	c, (hl)
 	ld	a, (#_robot + 0)
@@ -4809,82 +5759,82 @@ _fade_to_level::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:179: move_sprite(1, robot.x + 8, robot.y);
-	jr	00127$
-00117$:
-;main.c:180: } else if (fade_phase == 4) {
+;main.c:147: continue;
+	jr	00114$
+00104$:
+;main.c:149: if (fade_phase < 4) {
 	ldhl	sp,	#2
 	ld	a, (hl)
 	sub	a, #0x04
-	jr	NZ, 00114$
-;main.c:181: BGP_REG = 0xFE; //11111001
-	ld	a, #0xfe
+	jr	NC, 00109$
+;main.c:150: BGP_REG = (BGP_REG >> 2) | 0b11000000; // set first two bits to black after shifting right 
+	ldh	a, (_BGP_REG + 0)
+	rrca
+	rrca
+	and	a, #0x3f
+	or	a, #0xc0
 	ldh	(_BGP_REG + 0), a
-;main.c:182: OBP0_REG = 0xFE;
-	ld	a, #0xfe
+;main.c:151: OBP0_REG = (OBP0_REG >> 2) | 0b11000000;
+	ldh	a, (_OBP0_REG + 0)
+	rrca
+	rrca
+	and	a, #0x3f
+	or	a, #0xc0
 	ldh	(_OBP0_REG + 0), a
-	jr	00127$
-00114$:
-;main.c:183: } else if (fade_phase == 5) {
-	ldhl	sp,	#2
-	ld	a, (hl)
-	sub	a, #0x05
-	jr	NZ, 00111$
-;main.c:184: BGP_REG = 0xF9; //11111001
-	ld	a, #0xf9
-	ldh	(_BGP_REG + 0), a
-;main.c:185: OBP0_REG = 0xF9;
-	ld	a, #0xf9
-	ldh	(_OBP0_REG + 0), a
-	jr	00127$
-00111$:
-;main.c:186: } else if (fade_phase == 6) {
-	ldhl	sp,	#2
-	ld	a, (hl)
-	sub	a, #0x06
-	jr	NZ, 00108$
-;main.c:187: BGP_REG = 0xE4; //11100100
-	ld	a, #0xe4
-	ldh	(_BGP_REG + 0), a
-;main.c:188: OBP0_REG = 0xE4;
-	ld	a, #0xe4
-	ldh	(_OBP0_REG + 0), a
-	jr	00127$
-00108$:
-;main.c:189: } else if (fade_phase == 7) {
+;main.c:152: continue;
+	jp	00114$
+00109$:
+;main.c:154: else if (fade_phase < 7) {
 	ldhl	sp,	#2
 	ld	a, (hl)
 	sub	a, #0x07
-	jr	Z, 00133$
-;main.c:190: break;
-00127$:
-;main.c:192: wait_vbl_done();
+	jr	NC, 00118$
+;main.c:155: BGP_REG = (BGP_REG << 2) | (6 - fade_phase); // 6 - fade_phase at this point would set the respective last 2 bits for each phase, 2 for phase 4, 1 for 5, 0 for 6
+	ldh	a, (_BGP_REG + 0)
+	add	a, a
+	add	a, a
+	ld	c, a
+	ld	b, (hl)
+	ld	a, #0x06
+	sub	a, b
+	ld	b,a
+	or	a,c
+	ldh	(_BGP_REG + 0), a
+;main.c:156: OBP0_REG = (OBP0_REG << 2) | (6 - fade_phase);
+	ldh	a, (_OBP0_REG + 0)
+	add	a, a
+	add	a, a
+	or	a, b
+	ldh	(_OBP0_REG + 0), a
+;main.c:158: break;
+00112$:
+;main.c:162: wait_vbl_done();
 	call	_wait_vbl_done
-	jp	00129$
-00133$:
-;main.c:194: }
+	jp	00114$
+00118$:
+;main.c:164: }
 	add	sp, #4
 	ret
-;main.c:196: void game(){
+;main.c:166: void game(){
 ;	---------------------------------
 ; Function game
 ; ---------------------------------
 _game::
 	add	sp, #-6
-;main.c:198: uint8_t game_state = 0;
+;main.c:168: uint8_t game_state = 0;
 	ldhl	sp,	#0
 	ld	(hl), #0x00
-;main.c:203: robot.x = 24;
+;main.c:173: robot.x = 24;
 	ld	hl, #_robot
 	ld	(hl), #0x18
-;main.c:204: robot.y = 32;
+;main.c:174: robot.y = 32;
 	ld	hl, #(_robot + 1)
 	ld	(hl), #0x20
-;main.c:207: SPRITES_8x16;
+;main.c:177: SPRITES_8x16;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x04
 	ldh	(_LCDC_REG + 0), a
-;main.c:210: set_sprite_data(0, 4 , MainSpriteLabel);
+;main.c:180: set_sprite_data(0, 4 , MainSpriteLabel);
 	ld	de, #_MainSpriteLabel
 	push	de
 	ld	hl, #0x400
@@ -4894,7 +5844,7 @@ _game::
 ;E:/gbdk/include/gb/gb.h:1602: shadow_OAM[nb].tile=tile;
 	ld	hl, #(_shadow_OAM + 2)
 	ld	(hl), #0x01
-;main.c:212: move_sprite(0, robot.x, 64);
+;main.c:182: move_sprite(0, robot.x, 64);
 	ld	hl, #_robot
 	ld	c, (hl)
 ;E:/gbdk/include/gb/gb.h:1675: OAM_item_t * itm = &shadow_OAM[nb];
@@ -4906,7 +5856,7 @@ _game::
 ;E:/gbdk/include/gb/gb.h:1602: shadow_OAM[nb].tile=tile;
 	ld	hl, #(_shadow_OAM + 6)
 	ld	(hl), #0x02
-;main.c:214: move_sprite(1, robot.x + 8, 64);
+;main.c:184: move_sprite(1, robot.x + 8, 64);
 	ld	a, (#_robot + 0)
 	add	a, #0x08
 	ld	c, a
@@ -4916,17 +5866,17 @@ _game::
 	ld	(hl), #0x40
 	inc	hl
 	ld	(hl), c
-;main.c:216: uint8_t joy_inp = joypad();
+;main.c:186: uint8_t joy_inp = joypad();
 	call	_joypad
 	ldhl	sp,	#1
 	ld	(hl), a
-;main.c:219: while(1) {
+;main.c:189: while(1) {
 00154$:
-;main.c:221: if (current_level == 1) {
+;main.c:191: if (current_level == 1) {
 	ld	a, (#_current_level)
 	dec	a
 	jr	NZ, 00104$
-;main.c:222: set_bkg_tiles(0,0, 1,1, BlankTile);
+;main.c:192: set_bkg_tiles(0,0, 1,1, BlankTile);
 	ld	de, #_BlankTile
 	push	de
 	ld	hl, #0x101
@@ -4939,11 +5889,11 @@ _game::
 	add	sp, #6
 	jr	00105$
 00104$:
-;main.c:223: } else if (current_level == 2) {
+;main.c:193: } else if (current_level == 2) {
 	ld	a, (#_current_level)
 	sub	a, #0x02
 	jr	NZ, 00105$
-;main.c:224: set_bkg_tiles(0,0, 1,1, ExitTile);
+;main.c:194: set_bkg_tiles(0,0, 1,1, ExitTile);
 	ld	de, #_ExitTile
 	push	de
 	ld	hl, #0x101
@@ -4955,14 +5905,14 @@ _game::
 	call	_set_bkg_tiles
 	add	sp, #6
 00105$:
-;main.c:227: prev_joy_inp = joy_inp;
+;main.c:197: prev_joy_inp = joy_inp;
 	ldhl	sp,	#1
 	ld	c, (hl)
-;main.c:228: joy_inp = joypad();
+;main.c:198: joy_inp = joypad();
 	call	_joypad
 	ldhl	sp,	#1
 	ld	(hl), a
-;main.c:332: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+;main.c:302: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
 	ld	a, (hl+)
 	and	a, #0x80
 	ld	(hl+), a
@@ -4972,7 +5922,7 @@ _game::
 	and	a, #0x80
 	ld	(hl+), a
 	ld	(hl), #0x00
-;main.c:230: switch (game_state) {
+;main.c:200: switch (game_state) {
 	ldhl	sp,	#0
 	ld	a, (hl)
 	or	a, a
@@ -4986,20 +5936,20 @@ _game::
 	sub	a, #0x02
 	jp	Z,00150$
 	jp	00152$
-;main.c:231: case 0:
+;main.c:201: case 0:
 00106$:
-;main.c:232: if (joy_inp & J_UP) {   
+;main.c:202: if (joy_inp & J_UP) {   
 	push	hl
 	ldhl	sp,	#3
 	bit	2, (hl)
 	pop	hl
 	jp	Z,00114$
-;main.c:233: if (!pressing_up) {
+;main.c:203: if (!pressing_up) {
 	ld	hl, #_pressing_up
 	ld	a, (hl)
 	or	a, a
 	jp	NZ, 00115$
-;main.c:234: switch (canplayermove(robot.x, robot.y - 16)){
+;main.c:204: switch (canplayermove(robot.x, robot.y - 16)){
 	ld	a, (#(_robot + 1) + 0)
 	add	a, #0xf0
 	ld	b, a
@@ -5009,7 +5959,7 @@ _game::
 	ld	a, c
 	call	_canplayermove
 	ld	e, a
-;main.c:236: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_frame_counter
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -5018,7 +5968,7 @@ _game::
 	push	de
 	ld	bc, #0x0007
 	ld	e, l
-;main.c:234: switch (canplayermove(robot.x, robot.y - 16)){
+;main.c:204: switch (canplayermove(robot.x, robot.y - 16)){
 	call	__modsint
 	pop	de
 	ld	a, e
@@ -5031,9 +5981,9 @@ _game::
 	sub	a, #0x02
 	jr	Z, 00109$
 	jr	00115$
-;main.c:235: case 0:
+;main.c:205: case 0:
 00107$:
-;main.c:236: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5048,14 +5998,14 @@ _game::
 	ld	e, #0x41
 	ld	a, #0x79
 	call	_squareone_play
-;main.c:237: pressing_up = TRUE;
+;main.c:207: pressing_up = TRUE;
 	ld	hl, #_pressing_up
 	ld	(hl), #0x01
-;main.c:238: break;
+;main.c:208: break;
 	jr	00115$
-;main.c:239: case 1:
+;main.c:209: case 1:
 00108$:
-;main.c:240: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+;main.c:210: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5070,52 +6020,52 @@ _game::
 	ld	e, #0x80
 	ld	a, #0x08
 	call	_squareone_play
-;main.c:241: robot.y -= 16;
+;main.c:211: robot.y -= 16;
 	ld	a, (#(_robot + 1) + 0)
 	add	a, #0xf0
 	ld	(#(_robot + 1)),a
-;main.c:242: pressing_up = TRUE;
+;main.c:212: pressing_up = TRUE;
 	ld	hl, #_pressing_up
 	ld	(hl), #0x01
-;main.c:243: break;
+;main.c:213: break;
 	jr	00115$
-;main.c:244: case 2:
+;main.c:214: case 2:
 00109$:
-;main.c:245: noise_play(0x2D,0x67,0x01,0x80);
+;main.c:215: noise_play(0x2D,0x67,0x01,0x80);
 	ld	hl, #0x8001
 	push	hl
 	ld	e, #0x67
 	ld	a, #0x2d
 	call	_noise_play
-;main.c:246: robot.y -= 16;
+;main.c:216: robot.y -= 16;
 	ld	a, (#(_robot + 1) + 0)
 	add	a, #0xf0
 	ld	(#(_robot + 1)),a
-;main.c:247: pressing_up = TRUE;
+;main.c:217: pressing_up = TRUE;
 	ld	hl, #_pressing_up
 	ld	(hl), #0x01
-;main.c:248: game_state = 2;
+;main.c:218: game_state = 2;
 	ldhl	sp,	#0
 	ld	(hl), #0x02
-;main.c:251: }
+;main.c:221: }
 	jr	00115$
 00114$:
-;main.c:254: pressing_up = FALSE;
+;main.c:224: pressing_up = FALSE;
 	ld	hl, #_pressing_up
 	ld	(hl), #0x00
 00115$:
-;main.c:257: if (joy_inp & J_DOWN) {     
+;main.c:227: if (joy_inp & J_DOWN) {     
 	push	hl
 	ldhl	sp,	#3
 	bit	3, (hl)
 	pop	hl
 	jp	Z,00123$
-;main.c:258: if (!pressing_down) {       
+;main.c:228: if (!pressing_down) {       
 	ld	hl, #_pressing_down
 	ld	a, (hl)
 	or	a, a
 	jp	NZ, 00124$
-;main.c:259: switch (canplayermove(robot.x, robot.y + 16)){
+;main.c:229: switch (canplayermove(robot.x, robot.y + 16)){
 	ld	a, (#(_robot + 1) + 0)
 	add	a, #0x10
 	ld	b, a
@@ -5125,7 +6075,7 @@ _game::
 	ld	a, c
 	call	_canplayermove
 	ld	e, a
-;main.c:236: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_frame_counter
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -5134,7 +6084,7 @@ _game::
 	push	de
 	ld	bc, #0x0007
 	ld	e, l
-;main.c:259: switch (canplayermove(robot.x, robot.y + 16)){
+;main.c:229: switch (canplayermove(robot.x, robot.y + 16)){
 	call	__modsint
 	pop	de
 	ld	a, e
@@ -5147,9 +6097,9 @@ _game::
 	sub	a, #0x02
 	jr	Z, 00118$
 	jr	00124$
-;main.c:260: case 0:
+;main.c:230: case 0:
 00116$:
-;main.c:261: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:231: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5164,14 +6114,14 @@ _game::
 	ld	e, #0x41
 	ld	a, #0x79
 	call	_squareone_play
-;main.c:262: pressing_down = TRUE;
+;main.c:232: pressing_down = TRUE;
 	ld	hl, #_pressing_down
 	ld	(hl), #0x01
-;main.c:263: break;
+;main.c:233: break;
 	jr	00124$
-;main.c:264: case 1:
+;main.c:234: case 1:
 00117$:
-;main.c:265: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+;main.c:235: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5186,52 +6136,52 @@ _game::
 	ld	e, #0x80
 	ld	a, #0x08
 	call	_squareone_play
-;main.c:266: robot.y += 16;
+;main.c:236: robot.y += 16;
 	ld	a, (#(_robot + 1) + 0)
 	add	a, #0x10
 	ld	(#(_robot + 1)),a
-;main.c:267: pressing_down = TRUE;
+;main.c:237: pressing_down = TRUE;
 	ld	hl, #_pressing_down
 	ld	(hl), #0x01
-;main.c:268: break;
+;main.c:238: break;
 	jr	00124$
-;main.c:269: case 2:
+;main.c:239: case 2:
 00118$:
-;main.c:270: noise_play(0x2D,0x67,0x01,0x80);
+;main.c:240: noise_play(0x2D,0x67,0x01,0x80);
 	ld	hl, #0x8001
 	push	hl
 	ld	e, #0x67
 	ld	a, #0x2d
 	call	_noise_play
-;main.c:271: robot.y += 16;
+;main.c:241: robot.y += 16;
 	ld	a, (#(_robot + 1) + 0)
 	add	a, #0x10
 	ld	(#(_robot + 1)),a
-;main.c:272: pressing_down = TRUE;
+;main.c:242: pressing_down = TRUE;
 	ld	hl, #_pressing_down
 	ld	(hl), #0x01
-;main.c:273: game_state = 2;
+;main.c:243: game_state = 2;
 	ldhl	sp,	#0
 	ld	(hl), #0x02
-;main.c:276: }
+;main.c:246: }
 	jr	00124$
 00123$:
-;main.c:279: pressing_down = FALSE;
+;main.c:249: pressing_down = FALSE;
 	ld	hl, #_pressing_down
 	ld	(hl), #0x00
 00124$:
-;main.c:282: if (joy_inp & J_LEFT) {   
+;main.c:252: if (joy_inp & J_LEFT) {   
 	push	hl
 	ldhl	sp,	#3
 	bit	1, (hl)
 	pop	hl
 	jp	Z,00132$
-;main.c:283: if (!pressing_left) {
+;main.c:253: if (!pressing_left) {
 	ld	hl, #_pressing_left
 	ld	a, (hl)
 	or	a, a
 	jp	NZ, 00133$
-;main.c:284: switch (canplayermove(robot.x - 16, robot.y)) {
+;main.c:254: switch (canplayermove(robot.x - 16, robot.y)) {
 	ld	hl, #(_robot + 1)
 	ld	b, (hl)
 	ld	a, (#_robot + 0)
@@ -5239,7 +6189,7 @@ _game::
 	ld	e, b
 	call	_canplayermove
 	ld	e, a
-;main.c:236: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_frame_counter
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -5248,7 +6198,7 @@ _game::
 	push	de
 	ld	bc, #0x0007
 	ld	e, l
-;main.c:284: switch (canplayermove(robot.x - 16, robot.y)) {
+;main.c:254: switch (canplayermove(robot.x - 16, robot.y)) {
 	call	__modsint
 	pop	de
 	ld	a, e
@@ -5261,9 +6211,9 @@ _game::
 	sub	a, #0x02
 	jr	Z, 00127$
 	jr	00133$
-;main.c:285: case 0:
+;main.c:255: case 0:
 00125$:
-;main.c:286: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:256: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5278,14 +6228,14 @@ _game::
 	ld	e, #0x41
 	ld	a, #0x79
 	call	_squareone_play
-;main.c:287: pressing_left = TRUE;
+;main.c:257: pressing_left = TRUE;
 	ld	hl, #_pressing_left
 	ld	(hl), #0x01
-;main.c:288: break;
+;main.c:258: break;
 	jr	00133$
-;main.c:289: case 1:
+;main.c:259: case 1:
 00126$:
-;main.c:290: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+;main.c:260: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5300,51 +6250,51 @@ _game::
 	ld	e, #0x80
 	ld	a, #0x08
 	call	_squareone_play
-;main.c:291: robot.x -= 16;
+;main.c:261: robot.x -= 16;
 	ld	a, (#_robot + 0)
 	add	a, #0xf0
 	ld	(#_robot),a
-;main.c:292: pressing_left = TRUE;
+;main.c:262: pressing_left = TRUE;
 	ld	hl, #_pressing_left
 	ld	(hl), #0x01
-;main.c:293: break;
+;main.c:263: break;
 	jr	00133$
-;main.c:294: case 2:
+;main.c:264: case 2:
 00127$:
-;main.c:295: noise_play(0x2D,0x67,0x01,0x80);
+;main.c:265: noise_play(0x2D,0x67,0x01,0x80);
 	ld	hl, #0x8001
 	push	hl
 	ld	e, #0x67
 	ld	a, #0x2d
 	call	_noise_play
-;main.c:296: robot.x -= 16;
+;main.c:266: robot.x -= 16;
 	ld	a, (#_robot + 0)
 	add	a, #0xf0
 	ld	(#_robot),a
-;main.c:297: pressing_left = TRUE;
+;main.c:267: pressing_left = TRUE;
 	ld	hl, #_pressing_left
 	ld	(hl), #0x01
-;main.c:298: game_state = 2;
+;main.c:268: game_state = 2;
 	ldhl	sp,	#0
 	ld	(hl), #0x02
-;main.c:301: }
+;main.c:271: }
 	jr	00133$
 00132$:
-;main.c:304: pressing_left = FALSE;
+;main.c:274: pressing_left = FALSE;
 	ld	hl, #_pressing_left
 	ld	(hl), #0x00
 00133$:
-;main.c:307: if (joy_inp & J_RIGHT) {     
+;main.c:277: if (joy_inp & J_RIGHT) {     
 	push	hl
 	ldhl	sp,	#3
 	bit	0, (hl)
 	pop	hl
 	jp	Z,00141$
-;main.c:308: if (!pressing_right) {       
+;main.c:278: if (!pressing_right) {       
 	ld	a, (#_pressing_right)
 	or	a, a
 	jp	NZ, 00142$
-;main.c:309: switch (canplayermove(robot.x + 16, robot.y)) {
+;main.c:279: switch (canplayermove(robot.x + 16, robot.y)) {
 	ld	hl, #(_robot + 1)
 	ld	b, (hl)
 	ld	a, (#_robot + 0)
@@ -5352,7 +6302,7 @@ _game::
 	ld	e, b
 	call	_canplayermove
 	ld	e, a
-;main.c:236: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:206: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_frame_counter
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -5361,7 +6311,7 @@ _game::
 	push	de
 	ld	bc, #0x0007
 	ld	e, l
-;main.c:309: switch (canplayermove(robot.x + 16, robot.y)) {
+;main.c:279: switch (canplayermove(robot.x + 16, robot.y)) {
 	call	__modsint
 	pop	de
 	ld	a, e
@@ -5374,9 +6324,9 @@ _game::
 	sub	a, #0x02
 	jr	Z, 00136$
 	jr	00142$
-;main.c:310: case 0:
+;main.c:280: case 0:
 00134$:
-;main.c:311: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
+;main.c:281: squareone_play(0x79,0x41,0x44,freq_vals[frame_counter % 7],0x85);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5391,14 +6341,14 @@ _game::
 	ld	e, #0x41
 	ld	a, #0x79
 	call	_squareone_play
-;main.c:312: pressing_right = TRUE;
+;main.c:282: pressing_right = TRUE;
 	ld	hl, #_pressing_right
 	ld	(hl), #0x01
-;main.c:313: break;
+;main.c:283: break;
 	jr	00142$
-;main.c:314: case 1:
+;main.c:284: case 1:
 00135$:
-;main.c:315: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
+;main.c:285: squareone_play(0x08,0x80,0x26,freq_vals[frame_counter % 7],0x86);
 	ld	hl, #_freq_vals
 	add	hl, bc
 	ld	a, (hl)
@@ -5413,41 +6363,41 @@ _game::
 	ld	e, #0x80
 	ld	a, #0x08
 	call	_squareone_play
-;main.c:316: robot.x += 16;
+;main.c:286: robot.x += 16;
 	ld	a, (#_robot + 0)
 	add	a, #0x10
 	ld	(#_robot),a
-;main.c:317: pressing_right = TRUE;
+;main.c:287: pressing_right = TRUE;
 	ld	hl, #_pressing_right
 	ld	(hl), #0x01
-;main.c:318: break;
+;main.c:288: break;
 	jr	00142$
-;main.c:319: case 2:
+;main.c:289: case 2:
 00136$:
-;main.c:320: noise_play(0x2D,0x67,0x01,0x80);
+;main.c:290: noise_play(0x2D,0x67,0x01,0x80);
 	ld	hl, #0x8001
 	push	hl
 	ld	e, #0x67
 	ld	a, #0x2d
 	call	_noise_play
-;main.c:321: robot.x += 16;
+;main.c:291: robot.x += 16;
 	ld	a, (#_robot + 0)
 	add	a, #0x10
 	ld	(#_robot),a
-;main.c:322: pressing_right = TRUE;
+;main.c:292: pressing_right = TRUE;
 	ld	hl, #_pressing_right
 	ld	(hl), #0x01
-;main.c:323: game_state = 2;
+;main.c:293: game_state = 2;
 	ldhl	sp,	#0
 	ld	(hl), #0x02
-;main.c:326: }
+;main.c:296: }
 	jr	00142$
 00141$:
-;main.c:329: pressing_right = FALSE;
+;main.c:299: pressing_right = FALSE;
 	ld	hl, #_pressing_right
 	ld	(hl), #0x00
 00142$:
-;main.c:332: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+;main.c:302: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
 	ldhl	sp,	#3
 	ld	a, (hl-)
 	or	a, (hl)
@@ -5456,10 +6406,10 @@ _game::
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	NZ, 00152$
-;main.c:333: game_state = 1;
+;main.c:303: game_state = 1;
 	ldhl	sp,	#0
 	ld	(hl), #0x01
-;main.c:334: set_bkg_tiles(0, 0, 2, 2, BaseBG);
+;main.c:304: set_bkg_tiles(0, 0, 2, 2, BaseBG);
 	ld	de, #_BaseBG
 	push	de
 	ld	hl, #0x202
@@ -5469,11 +6419,11 @@ _game::
 	push	af
 	call	_set_bkg_tiles
 	add	sp, #6
-;main.c:336: break;
+;main.c:306: break;
 	jr	00152$
-;main.c:339: case 1:
+;main.c:309: case 1:
 00146$:
-;main.c:340: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
+;main.c:310: if (joy_inp & J_START && !(prev_joy_inp & J_START)) {
 	ldhl	sp,	#3
 	ld	a, (hl-)
 	or	a, (hl)
@@ -5482,10 +6432,10 @@ _game::
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	NZ, 00152$
-;main.c:341: game_state = 0;
+;main.c:311: game_state = 0;
 	ldhl	sp,	#0
 	ld	(hl), #0x00
-;main.c:342: set_bkg_tiles(2, 0, 2, 2, BaseBG);
+;main.c:312: set_bkg_tiles(2, 0, 2, 2, BaseBG);
 	ld	de, #_BaseBG
 	push	de
 	ld	hl, #0x202
@@ -5494,23 +6444,23 @@ _game::
 	push	hl
 	call	_set_bkg_tiles
 	add	sp, #6
-;main.c:344: break;
+;main.c:314: break;
 	jr	00152$
-;main.c:347: case 2:
+;main.c:317: case 2:
 00150$:
-;main.c:348: fade_to_level(current_level + 1, FALSE);
+;main.c:318: fade_to_level(current_level + 1, FALSE);
 	ld	hl, #_current_level
 	ld	c, (hl)
 	inc	c
 	ld	e, #0x00
 	ld	a, c
 	call	_fade_to_level
-;main.c:349: game_state = 0;
+;main.c:319: game_state = 0;
 	ldhl	sp,	#0
 	ld	(hl), #0x00
-;main.c:354: }
+;main.c:324: }
 00152$:
-;main.c:356: move_sprite(0, robot.x, robot.y);
+;main.c:326: move_sprite(0, robot.x, robot.y);
 	ld	hl, #(_robot + 1)
 	ld	c, (hl)
 	ld	hl, #_robot
@@ -5521,7 +6471,7 @@ _game::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:357: move_sprite(1, robot.x + 8, robot.y);
+;main.c:327: move_sprite(1, robot.x + 8, robot.y);
 	ld	hl, #(_robot + 1)
 	ld	c, (hl)
 	ld	a, (#_robot + 0)
@@ -5533,49 +6483,49 @@ _game::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:359: frame_counter++;
+;main.c:329: frame_counter++;
 	ld	hl, #_frame_counter
 	inc	(hl)
-;main.c:360: wait_vbl_done();
+;main.c:330: wait_vbl_done();
 	call	_wait_vbl_done
 	jp	00154$
-;main.c:362: }
+;main.c:332: }
 	add	sp, #6
 	ret
-;main.c:364: void main(){
+;main.c:334: void main(){
 ;	---------------------------------
 ; Function main
 ; ---------------------------------
 _main::
-;main.c:368: SHOW_BKG;
+;main.c:338: SHOW_BKG;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x01
 	ldh	(_LCDC_REG + 0), a
-;main.c:369: SHOW_SPRITES;
+;main.c:339: SHOW_SPRITES;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x02
 	ldh	(_LCDC_REG + 0), a
-;main.c:370: DISPLAY_ON;
+;main.c:340: DISPLAY_ON;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x80
 	ldh	(_LCDC_REG + 0), a
-;main.c:371: NR52_REG = 0x80;
+;main.c:341: NR52_REG = 0x80;
 	ld	a, #0x80
 	ldh	(_NR52_REG + 0), a
-;main.c:372: NR50_REG = 0x77;
+;main.c:342: NR50_REG = 0x77;
 	ld	a, #0x77
 	ldh	(_NR50_REG + 0), a
-;main.c:373: NR51_REG = 0xFF;
+;main.c:343: NR51_REG = 0xFF;
 	ld	a, #0xff
 	ldh	(_NR51_REG + 0), a
-;main.c:377: set_bkg_data(0, 146, GBRoboLabel);
+;main.c:347: set_bkg_data(0, 146, GBRoboLabel);
 	ld	de, #_GBRoboLabel
 	push	de
 	ld	hl, #0x9200
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-;main.c:378: set_bkg_tiles(0, 0, 20, 18, GBRoboMapLabel);
+;main.c:348: set_bkg_tiles(0, 0, 20, 18, GBRoboMapLabel);
 	ld	de, #_GBRoboMapLabel
 	push	de
 	ld	hl, #0x1214
@@ -5586,20 +6536,20 @@ _main::
 	xor	a, a
 	call	_set_bkg_tiles
 	add	sp, #6
-;main.c:380: while(1) {
+;main.c:350: while(1) {
 00104$:
-;main.c:381: menu_joy_inp = joypad();
+;main.c:351: menu_joy_inp = joypad();
 	call	_joypad
-;main.c:383: if (menu_joy_inp & J_START) {
+;main.c:353: if (menu_joy_inp & J_START) {
 	rlca
 	jr	NC, 00104$
-;main.c:384: fade_to_level(1, TRUE);
+;main.c:354: fade_to_level(1, TRUE);
 	ld	a,#0x01
 	ld	e,a
 	call	_fade_to_level
-;main.c:385: game();
+;main.c:355: game();
 	call	_game
-;main.c:390: }
+;main.c:360: }
 	jr	00104$
 	.area _CODE
 	.area _INITIALIZER
@@ -6286,583 +7236,6 @@ __xinit__GameTiles:
 	.db #0x01	; 1
 	.db #0xff	; 255
 	.db #0xff	; 255
-__xinit__MainSpriteLabel:
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x02	; 2
-	.db #0x03	; 3
-	.db #0x02	; 2
-	.db #0x03	; 3
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x3f	; 63
-	.db #0x3f	; 63
-	.db #0x5f	; 95
-	.db #0x60	; 96
-	.db #0x7f	; 127
-	.db #0x4c	; 76	'L'
-	.db #0x7b	; 123
-	.db #0x56	; 86	'V'
-	.db #0x77	; 119	'w'
-	.db #0x5a	; 90	'Z'
-	.db #0x7f	; 127
-	.db #0x4c	; 76	'L'
-	.db #0x7f	; 127
-	.db #0x40	; 64
-	.db #0x7f	; 127
-	.db #0x43	; 67	'C'
-	.db #0x4f	; 79	'O'
-	.db #0x70	; 112	'p'
-	.db #0x3f	; 63
-	.db #0x3f	; 63
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x80	; 128
-	.db #0x80	; 128
-	.db #0xc0	; 192
-	.db #0x40	; 64
-	.db #0x40	; 64
-	.db #0xc0	; 192
-	.db #0x80	; 128
-	.db #0x80	; 128
-	.db #0xfc	; 252
-	.db #0xfc	; 252
-	.db #0xfa	; 250
-	.db #0x06	; 6
-	.db #0xfe	; 254
-	.db #0x32	; 50	'2'
-	.db #0xee	; 238
-	.db #0x5a	; 90	'Z'
-	.db #0xde	; 222
-	.db #0x6a	; 106	'j'
-	.db #0xfe	; 254
-	.db #0x32	; 50	'2'
-	.db #0xfe	; 254
-	.db #0x02	; 2
-	.db #0xfe	; 254
-	.db #0xc2	; 194
-	.db #0xf2	; 242
-	.db #0x0e	; 14
-	.db #0xfc	; 252
-	.db #0xfc	; 252
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x07	; 7
-	.db #0x07	; 7
-	.db #0x78	; 120	'x'
-	.db #0x7f	; 127
-	.db #0x5c	; 92
-	.db #0x57	; 87	'W'
-	.db #0x5f	; 95
-	.db #0x53	; 83	'S'
-	.db #0x5f	; 95
-	.db #0x50	; 80	'P'
-	.db #0x5f	; 95
-	.db #0x50	; 80	'P'
-	.db #0x5f	; 95
-	.db #0x50	; 80	'P'
-	.db #0x3f	; 63
-	.db #0x30	; 48	'0'
-	.db #0x0f	; 15
-	.db #0x08	; 8
-	.db #0x0b	; 11
-	.db #0x0c	; 12
-	.db #0x07	; 7
-	.db #0x06	; 6
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x03	; 3
-	.db #0x02	; 2
-	.db #0x07	; 7
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0xe0	; 224
-	.db #0xe0	; 224
-	.db #0x1e	; 30
-	.db #0xfe	; 254
-	.db #0x2a	; 42
-	.db #0xfa	; 250
-	.db #0xca	; 202
-	.db #0xfa	; 250
-	.db #0xca	; 202
-	.db #0x3a	; 58
-	.db #0xca	; 202
-	.db #0x3a	; 58
-	.db #0x8a	; 138
-	.db #0x7a	; 122	'z'
-	.db #0x8c	; 140
-	.db #0x7c	; 124
-	.db #0x90	; 144
-	.db #0x70	; 112	'p'
-	.db #0x10	; 16
-	.db #0xf0	; 240
-	.db #0x60	; 96
-	.db #0xe0	; 224
-	.db #0x80	; 128
-	.db #0x80	; 128
-	.db #0x40	; 64
-	.db #0xc0	; 192
-	.db #0xe0	; 224
-	.db #0xe0	; 224
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x0f	; 15
-	.db #0x0f	; 15
-	.db #0x1c	; 28
-	.db #0x13	; 19
-	.db #0x0f	; 15
-	.db #0x0c	; 12
-	.db #0x04	; 4
-	.db #0x07	; 7
-	.db #0x0b	; 11
-	.db #0x0d	; 13
-	.db #0x17	; 23
-	.db #0x1b	; 27
-	.db #0x1f	; 31
-	.db #0x15	; 21
-	.db #0x2f	; 47
-	.db #0x33	; 51	'3'
-	.db #0x3f	; 63
-	.db #0x21	; 33
-	.db #0x3f	; 63
-	.db #0x27	; 39
-	.db #0x2f	; 47
-	.db #0x31	; 49	'1'
-	.db #0x10	; 16
-	.db #0x1f	; 31
-	.db #0x0f	; 15
-	.db #0x0f	; 15
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0xf0	; 240
-	.db #0xf0	; 240
-	.db #0x38	; 56	'8'
-	.db #0xc8	; 200
-	.db #0xf0	; 240
-	.db #0x30	; 48	'0'
-	.db #0x20	; 32
-	.db #0xe0	; 224
-	.db #0xd0	; 208
-	.db #0x30	; 48	'0'
-	.db #0xe8	; 232
-	.db #0xd8	; 216
-	.db #0xf8	; 248
-	.db #0x08	; 8
-	.db #0xf4	; 244
-	.db #0x8c	; 140
-	.db #0xfc	; 252
-	.db #0x44	; 68	'D'
-	.db #0xfc	; 252
-	.db #0x84	; 132
-	.db #0xf4	; 244
-	.db #0x0c	; 12
-	.db #0x08	; 8
-	.db #0xf8	; 248
-	.db #0xf0	; 240
-	.db #0xf0	; 240
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x07	; 7
-	.db #0x07	; 7
-	.db #0x0f	; 15
-	.db #0x08	; 8
-	.db #0x1f	; 31
-	.db #0x11	; 17
-	.db #0x1e	; 30
-	.db #0x12	; 18
-	.db #0x1f	; 31
-	.db #0x11	; 17
-	.db #0x17	; 23
-	.db #0x18	; 24
-	.db #0x0b	; 11
-	.db #0x0c	; 12
-	.db #0x07	; 7
-	.db #0x06	; 6
-	.db #0x03	; 3
-	.db #0x02	; 2
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x03	; 3
-	.db #0x02	; 2
-	.db #0x03	; 3
-	.db #0x02	; 2
-	.db #0x01	; 1
-	.db #0x01	; 1
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0xe0	; 224
-	.db #0xe0	; 224
-	.db #0xf0	; 240
-	.db #0x10	; 16
-	.db #0xe8	; 232
-	.db #0x98	; 152
-	.db #0x68	; 104	'h'
-	.db #0x58	; 88	'X'
-	.db #0xe8	; 232
-	.db #0x98	; 152
-	.db #0xe8	; 232
-	.db #0x18	; 24
-	.db #0xd0	; 208
-	.db #0x30	; 48	'0'
-	.db #0x60	; 96
-	.db #0xe0	; 224
-	.db #0x40	; 64
-	.db #0xc0	; 192
-	.db #0x40	; 64
-	.db #0xc0	; 192
-	.db #0x40	; 64
-	.db #0xc0	; 192
-	.db #0x40	; 64
-	.db #0xc0	; 192
-	.db #0x40	; 64
-	.db #0xc0	; 192
-	.db #0x80	; 128
-	.db #0x80	; 128
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x07	; 7
-	.db #0x07	; 7
-	.db #0x1f	; 31
-	.db #0x18	; 24
-	.db #0x3f	; 63
-	.db #0x20	; 32
-	.db #0x3f	; 63
-	.db #0x20	; 32
-	.db #0x3f	; 63
-	.db #0x38	; 56	'8'
-	.db #0x3f	; 63
-	.db #0x27	; 39
-	.db #0x3f	; 63
-	.db #0x20	; 32
-	.db #0x2f	; 47
-	.db #0x30	; 48	'0'
-	.db #0x1b	; 27
-	.db #0x1c	; 28
-	.db #0x07	; 7
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0xe0	; 224
-	.db #0xe0	; 224
-	.db #0xf8	; 248
-	.db #0x18	; 24
-	.db #0xe4	; 228
-	.db #0x1c	; 28
-	.db #0xe4	; 228
-	.db #0x1c	; 28
-	.db #0xdc	; 220
-	.db #0x3c	; 60
-	.db #0xe4	; 228
-	.db #0xfc	; 252
-	.db #0xc4	; 196
-	.db #0x3c	; 60
-	.db #0x84	; 132
-	.db #0x7c	; 124
-	.db #0x98	; 152
-	.db #0x78	; 120	'x'
-	.db #0xe0	; 224
-	.db #0xe0	; 224
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x07	; 7
-	.db #0x07	; 7
-	.db #0x1f	; 31
-	.db #0x18	; 24
-	.db #0x3f	; 63
-	.db #0x20	; 32
-	.db #0x3f	; 63
-	.db #0x20	; 32
-	.db #0x1f	; 31
-	.db #0x18	; 24
-	.db #0x07	; 7
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0xe0	; 224
-	.db #0xe0	; 224
-	.db #0xf8	; 248
-	.db #0x18	; 24
-	.db #0xfc	; 252
-	.db #0x04	; 4
-	.db #0xfc	; 252
-	.db #0x04	; 4
-	.db #0xf8	; 248
-	.db #0x18	; 24
-	.db #0xe0	; 224
-	.db #0xe0	; 224
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x3f	; 63
-	.db #0x3f	; 63
-	.db #0x40	; 64
-	.db #0x7f	; 127
-	.db #0x42	; 66	'B'
-	.db #0x7d	; 125
-	.db #0x44	; 68	'D'
-	.db #0x7b	; 123
-	.db #0x4e	; 78	'N'
-	.db #0x71	; 113	'q'
-	.db #0x44	; 68	'D'
-	.db #0x7b	; 123
-	.db #0x48	; 72	'H'
-	.db #0x77	; 119	'w'
-	.db #0x40	; 64
-	.db #0x7f	; 127
-	.db #0x3f	; 63
-	.db #0x3f	; 63
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0xf8	; 248
-	.db #0xf8	; 248
-	.db #0x7c	; 124
-	.db #0x84	; 132
-	.db #0x7e	; 126
-	.db #0x86	; 134
-	.db #0x7c	; 124
-	.db #0x84	; 132
-	.db #0x7c	; 124
-	.db #0x84	; 132
-	.db #0x7c	; 124
-	.db #0x84	; 132
-	.db #0x7e	; 126
-	.db #0x86	; 134
-	.db #0x7c	; 124
-	.db #0x84	; 132
-	.db #0xf8	; 248
-	.db #0xf8	; 248
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x1f	; 31
-	.db #0x1f	; 31
-	.db #0x20	; 32
-	.db #0x20	; 32
-	.db #0x40	; 64
-	.db #0x40	; 64
-	.db #0x20	; 32
-	.db #0x20	; 32
-	.db #0x10	; 16
-	.db #0x10	; 16
-	.db #0x08	; 8
-	.db #0x08	; 8
-	.db #0x04	; 4
-	.db #0x04	; 4
-	.db #0x03	; 3
-	.db #0x03	; 3
-	.db #0x03	; 3
-	.db #0x03	; 3
-	.db #0x04	; 4
-	.db #0x04	; 4
-	.db #0x18	; 24
-	.db #0x08	; 8
-	.db #0x78	; 120	'x'
-	.db #0x10	; 16
-	.db #0x30	; 48	'0'
-	.db #0x20	; 32
-	.db #0x10	; 16
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x8e	; 142
-	.db #0x8e	; 142
-	.db #0x46	; 70	'F'
-	.db #0x66	; 102	'f'
-	.db #0x0a	; 10
-	.db #0x1a	; 26
-	.db #0x10	; 16
-	.db #0x18	; 24
-	.db #0x20	; 32
-	.db #0x24	; 36
-	.db #0x44	; 68	'D'
-	.db #0x44	; 68	'D'
-	.db #0x82	; 130
-	.db #0x82	; 130
-	.db #0x02	; 2
-	.db #0x02	; 2
-	.db #0x02	; 2
-	.db #0x02	; 2
-	.db #0x82	; 130
-	.db #0x82	; 130
-	.db #0x42	; 66	'B'
-	.db #0x42	; 66	'B'
-	.db #0x22	; 34
-	.db #0x22	; 34
-	.db #0x14	; 20
-	.db #0x14	; 20
-	.db #0x08	; 8
-	.db #0x08	; 8
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
 __xinit__ExitTile:
 	.db #0x14	; 20
 	.db #0x16	; 22
@@ -6884,327 +7257,6 @@ __xinit__pressing_left:
 __xinit__pressing_right:
 	.db #0x00	;  0
 __xinit__frame_counter:
-	.db #0x00	; 0
-__xinit__GameMap:
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x04	; 4
-	.db #0x06	; 6
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x05	; 5
-	.db #0x07	; 7
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
 	.db #0x00	; 0
 __xinit__GameMapWidth:
 	.db #0x14	; 20

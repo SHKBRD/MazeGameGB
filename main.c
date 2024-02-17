@@ -17,7 +17,6 @@
 #include "maps/Map1.c"
 #include "maps/Map2.c"
 #include "maps/Map3.c"
-
 #include "maps/Mapblah.c"
 
 BOOLEAN paused = FALSE;
@@ -48,6 +47,12 @@ struct interact
     uint8_t y; 
 };
 struct interact robot;
+struct battery_interface
+{
+    uint8_t x;
+    uint8_t y; 
+};
+struct battery_interface;
 
 uint8_t current_level = 255;
 
@@ -79,7 +84,7 @@ uint8_t canplayermove(uint8_t playerX, uint8_t playerY){
     // exit tile
     } else if ((GameMap[tileindexTL] >= 0x14 && GameMap[tileindexTL] <= 0x17)){
         result = 2;
-    // unmovable tiles, dedfault to all of them
+    // unmovable tiles, default to all of them
     } else {
         result = 0;
     }
